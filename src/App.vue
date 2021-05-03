@@ -1,8 +1,8 @@
 <template>
   <el-container>
     <el-header>
-      <el-menu class="el-menu-demo" mode="horizontal" >
-        <el-menu-item>Item 1</el-menu-item>
+      <el-menu mode="horizontal">
+        <el-menu-item>Register</el-menu-item>
       </el-menu>
     </el-header>
 

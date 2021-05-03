@@ -5,6 +5,7 @@ import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 import axios from 'axios';
 import Register from "@/components/Register";
+import User from "@/components/User";
 import "./assets/styles.css" // Global CSS
 
 // todo: default path to login.
@@ -13,6 +14,10 @@ const routes = [
         path: "/",
         component: Register
     },
+    {
+        path: "/user",
+        component: User
+    }
 ];
 
 const app = createApp(App);
