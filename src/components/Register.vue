@@ -29,8 +29,8 @@
           <el-input v-model="registerForm.lastName" placeholder="Last Name"></el-input>
         </el-form-item>
 
-        <el-form-item id="email">
-          <el-input v-model="registerForm.email" placeholder="Email"></el-input>
+        <el-form-item id="email" prop="email">
+          <el-input v-model="registerForm.email" placeholder="Email" type="email"></el-input>
         </el-form-item>
         <el-form-item id="password" prop="password">
           <el-input v-model="registerForm.password" placeholder="Password" type="password" show-password></el-input>
@@ -65,6 +65,10 @@ export default {
         ],
         lastName: [
           {required: true, message: "Last name is required.", trigger: 'change'}
+        ],
+        email: [
+          {required: true, message: "Email is required.", trigger: 'change'},
+          {type: 'email', message: "Please input a valid email.", trigger: 'blur'}
         ],
         password: [
           {required: true, message: "Password is required.", trigger: 'change'},
