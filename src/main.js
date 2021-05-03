@@ -6,9 +6,10 @@ import 'element-plus/lib/theme-chalk/index.css';
 import axios from 'axios';
 import Register from "@/components/Register";
 import User from "@/components/User";
-import "./assets/styles.css" // Global CSS
+import "./assets/styles.css"
+import EventSearch from "@/components/EventSearch"; // Global CSS
 
-// todo: default path to login.
+
 const routes = [
     {
         path: "/",
@@ -17,6 +18,10 @@ const routes = [
     {
         path: "/user",
         component: User
+    },
+    {
+        path: "/events",
+        component: EventSearch
     }
 ];
 

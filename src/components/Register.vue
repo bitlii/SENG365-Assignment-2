@@ -1,7 +1,5 @@
 <template>
-  <div id="container">
-
-    <el-card>
+   <el-card class="container">
       <el-form :model="registerForm" id="form-container" ref="registerForm" :rules="formRules">
 
         <el-header id="form-header">
@@ -42,8 +40,6 @@
 
       </el-form>
     </el-card>
-
-  </div>
 </template>
 
 <script>

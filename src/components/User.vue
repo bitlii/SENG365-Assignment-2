@@ -1,5 +1,5 @@
 <template>
-  <el-card id="container">
+  <el-card class="container">
     <div id="image-container">
       <el-avatar icon="el-icon-user-solid" :size="250" shape="square"></el-avatar>
     </div>
@@ -24,14 +24,6 @@ export default {
 </script>
 
 <style scoped>
-  #container {
-    min-width: 400px;
-    max-width: 75%;
-    padding: 1em;
-    margin: auto;
-    text-align: center;
-  }
-
   #image-container {
     text-align: center;
 
