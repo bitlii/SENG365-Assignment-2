@@ -1,7 +1,6 @@
 <template>
    <el-card class="container">
       <el-form :model="registerForm" id="form-container" ref="registerForm" :rules="formRules">
-
         <el-header id="form-header">
           Create a new account
         </el-header>
@@ -43,6 +42,8 @@
 </template>
 
 <script>
+import api from "../Api";
+
 export default {
   name: "Register",
 
@@ -95,7 +96,15 @@ export default {
     onRegister: function(form) {
       this.$refs[form].validate((isValid) => {
         if (isValid) {
-          alert("it works");
+          api.register(this.registerForm.firstName, this.registerForm.lastName, this.registerForm.email, this.registerForm.password)
+              .then(() => {
+                alert("yea");
+              })
+              .catch((error) => {
+                if (error.response.status === 400) {
+                  this.$message.error(error.response.statusText);
+                }
+              });
         }
         else {
           return false;
@@ -128,6 +137,7 @@ export default {
     grid-column: 1/3;
 
     text-align: center;
+    font-size: 18px;
   }
 
   #image-uploader {

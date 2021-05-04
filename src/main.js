@@ -5,14 +5,19 @@ import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 import axios from 'axios';
 import Register from "@/components/Register";
+import Login from "@/components/Login";
+import "./assets/styles.css" // Global CSS
 import User from "@/components/User";
-import "./assets/styles.css"
 import EventSearch from "@/components/EventSearch"; // Global CSS
 
 
 const routes = [
     {
         path: "/",
+        component: Login
+    },
+    {
+        path: "/register",
         component: Register
     },
     {
