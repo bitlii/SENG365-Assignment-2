@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import {state} from "../state";
 
 export default {
   name: "EventSearch",
@@ -52,6 +53,10 @@ export default {
     return {
       searchQuery: "",
     }
+  },
+
+  mounted: function() {
+    console.log(state);
   }
 
 }

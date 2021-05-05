@@ -43,6 +43,7 @@
 
 <script>
 import api from "../Api";
+import {state} from "../state";
 
 export default {
   name: "Register",
@@ -98,12 +99,24 @@ export default {
         if (isValid) {
           api.register(this.registerForm.firstName, this.registerForm.lastName, this.registerForm.email, this.registerForm.password)
               .then(() => {
-                alert("yea");
+                api.login(this.registerForm.email, this.registerForm.password)
+                  .then((res) => {
+                    state.userId = res.data.userId;
+                    state.token = res.data.token;
+                    this.$router.push("/events");
+                  })
+                  .catch((error) => {
+                    if (error.response.status === 400) {
+                      this.$message.error("Something went wrong logging you in.");
+                    }
+                    console.log(error);
+                  });
               })
               .catch((error) => {
                 if (error.response.status === 400) {
                   this.$message.error(error.response.statusText);
                 }
+                console.log(error);
               });
         }
         else {
