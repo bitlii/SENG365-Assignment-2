@@ -121,12 +121,14 @@ export default {
                   .then((res) => {
                     state.userId = res.data.userId;
                     state.token = res.data.token;
+                    api.setAuthHeader(state.token);
 
                     if (this.registerForm.profileImage != null) {
-                      let header = {'Content-Type': this.registerForm.profileImage.raw.type};
-                      api.setAuthHeader(state.token);
+                      let header = {
+                        'Content-Type': this.registerForm.profileImage.raw.type,
+                      };
 
-                      api.setUserImage(res.data.userId, this.registerForm.profileImage, header)
+                      api.setUserImage(res.data.userId, this.registerForm.profileImage.raw, header)
                         .then(() => {
                           this.$router.push("/events");
                         })

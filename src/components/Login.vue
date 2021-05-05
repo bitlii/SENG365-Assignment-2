@@ -26,6 +26,7 @@
 
 <script>
 import api from "../Api";
+import {state} from "../state";
 
 export default {
   name: "Login",
@@ -43,7 +44,11 @@ export default {
     login: function() {
       api.login(this.loginForm.email, this.loginForm.password)
           .then((res) => {
-            alert(res.toString()); //todo: receive response and set headers.
+            state.userId = res.data.userId;
+            state.token = res.data.token;
+            api.setAuthHeader(state.token);
+            this.$router.push("/events");
+
           })
           .catch((error) => {
             if (error.response.status === 400) {
@@ -78,18 +83,22 @@ export default {
 
     text-align: center;
     font-size: 18px;
+    margin: auto;
+    padding: 1em;
   }
 
   #email {
     grid-row: 2;
     grid-column: 1;
-
+    width: 50%;
+    margin: 1em auto;
   }
 
   #password {
     grid-row: 3;
     grid-column: 1;
-
+    width: 50%;
+    margin: 1em auto;
   }
 
   #login-button {

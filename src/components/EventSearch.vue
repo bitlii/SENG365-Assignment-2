@@ -56,7 +56,10 @@ export default {
   },
 
   mounted: function() {
-    console.log(state);
+    if (!state.hasToken()) {
+      this.$message.error("You must log in first.");
+      this.$router.push("/");
+    }
   }
 
 }
