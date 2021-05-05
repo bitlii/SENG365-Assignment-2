@@ -12,4 +12,12 @@ export default {
 
     login: (email, password) => instance.post("/users/login", {email, password}),
 
+    // User Image
+    setUserImage: (id, image, imageHeader) => instance.put(`/users/${id}/image`, {image}, {headers: imageHeader},),
+
+
+    // Other
+    setAuthHeader(token) {
+        instance.defaults.headers.common['X-Authorization'] = token;
+    },
 }

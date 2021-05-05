@@ -6,16 +6,18 @@
         </el-header>
 
         <el-form-item id="image-uploader">
-          <el-upload
-              class="avatar-uploader"
-              action="#"
-              :show-file-list="false"
-              :on-success="onProfileImageSelected"
-              :before-upload="checkValidProfileImage" >
-            <img v-if="registerForm.profileImage" :src="registerForm.profileImage" class="avatar" />
-            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             <div>Add Profile Image (Optional)</div>
-          </el-upload>
+            <el-upload
+                :class="{hideUpload: !showUpload}"
+                ref="uploadImage"
+                list-type="picture-card"
+                :on-change="toggleUpload"
+                :on-remove="toggleUpload"
+                action="#"
+                :auto-upload="false">
+              <div v-if="registerForm.profileImage == null" class="el-icon-plus avatar-uploader-icon"></div>
+
+            </el-upload>
         </el-form-item>
 
         <el-form-item id="first-name" prop="firstName">
@@ -57,6 +59,8 @@ export default {
         password: "",
         profileImage: null,
       },
+      showUpload: true,
+
       formRules: {
         firstName: [
           {required: true, message: "First name is required.", trigger: 'change'}
@@ -77,16 +81,29 @@ export default {
   },
 
   methods: {
-    onProfileImageSelected: function(res, file) {
-      console.log("Image uploaded.");
-      this.profileImage = file;
+    toggleUpload(file) {
+      this.showUpload = !this.showUpload;
+
+      if (!this.showUpload) {
+        if(this.checkValidProfileImage(file)) {
+          this.registerForm.profileImage = file;
+        }
+        else {
+          this.$refs['uploadImage'].clearFiles();
+          this.showUpload = !this.showUpload;
+        }
+      }
+      else {
+        this.registerForm.profileImage = null;
+      }
     },
 
     checkValidProfileImage: function(file) {
+      console.log(file);
       const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
       let isValid = true;
 
-      if (!validImageTypes.includes(file.type)) {
+      if (!validImageTypes.includes(file.raw.type)) {
         isValid = false;
         this.$message.error("Profile image must be a JPG, PNG, or GIF.")
       }
@@ -97,13 +114,29 @@ export default {
     onRegister: function(form) {
       this.$refs[form].validate((isValid) => {
         if (isValid) {
+          console.log(this.registerForm);
           api.register(this.registerForm.firstName, this.registerForm.lastName, this.registerForm.email, this.registerForm.password)
               .then(() => {
                 api.login(this.registerForm.email, this.registerForm.password)
                   .then((res) => {
                     state.userId = res.data.userId;
                     state.token = res.data.token;
-                    this.$router.push("/events");
+
+                    if (this.registerForm.profileImage != null) {
+                      let header = {'Content-Type': this.registerForm.profileImage.raw.type};
+                      api.setAuthHeader(state.token);
+
+                      api.setUserImage(res.data.userId, this.registerForm.profileImage, header)
+                        .then(() => {
+                          this.$router.push("/events");
+                        })
+                        .catch((error) => {
+                          this.$message.error("Something went wrong setting image: " + error.response.status);
+                        });
+                    }
+                    else {
+                      this.$router.push("/events");
+                    }
                   })
                   .catch((error) => {
                     if (error.response.status === 400) {
@@ -131,7 +164,7 @@ export default {
 </script>
 
 <style scoped>
-  #container {
+  .container {
     min-width: 400px;
     max-width: 800px;
     padding: 1em;
@@ -140,16 +173,17 @@ export default {
 
   #form-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: repeat(4, auto);
     grid-column-gap: 1em;
   }
 
   #form-header {
     grid-row: 1;
-    grid-column: 1/3;
+    grid-column: 1/4;
 
     text-align: center;
+    margin: auto;
     font-size: 18px;
   }
 
@@ -158,35 +192,43 @@ export default {
     grid-column: 1;
 
     text-align: center;
+    overflow: hidden;
+    margin: auto
   }
 
   #first-name {
     grid-row: 2;
     grid-column: 2;
+    margin: auto 0;
   }
 
   #last-name {
+    grid-row: 2;
+    grid-column: 3;
+    margin: auto 0;
+  }
+
+  #email {
     grid-row: 3;
     grid-column: 2;
+    margin: auto 0;
+  }
+
+  #password {
+    grid-row: 3;
+    grid-column: 3;
+    margin: auto 0;
   }
 
   #create-button {
-    grid-column: 2;
+    grid-column: 3;
     text-align: right;
   }
 
   /* Image Upload Styling */
-  .avatar-uploader {
-    padding: 1em;
-
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    overflow: hidden;
-  }
-
-  .avatar-uploader:hover {
-    border-color: #409eff;
+  .hideUpload >>> div {
+    margin: auto;
+    display: none;
   }
 
   .avatar-uploader-icon {
@@ -203,9 +245,6 @@ export default {
   }
 
   @media screen and (max-width: 560px) {
-    .avatar-uploader {
-      line-height: 24px;
-    }
   }
 
 </style>
