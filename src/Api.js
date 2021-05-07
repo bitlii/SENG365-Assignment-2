@@ -23,4 +23,5 @@ export default {
     setAuthHeader(token) {
         instance.defaults.headers.common['X-Authorization'] = token;
     },
+
 }

@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import {state} from "../state";
 
 export default {
   name: "EventSearch",
@@ -56,10 +55,14 @@ export default {
   },
 
   mounted: function() {
-    if (!state.hasToken()) {
+    if (sessionStorage.token === "") {
       this.$message.error("You must log in first.");
       this.$router.push("/");
     }
+
+    console.log(sessionStorage.getItem("userId"));
+    sessionStorage.setItem("test", "test");
+
   }
 
 }

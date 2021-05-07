@@ -45,7 +45,6 @@
 
 <script>
 import api from "../Api";
-import {state} from "../state";
 
 export default {
   name: "Register",
@@ -117,19 +116,22 @@ export default {
           console.log(this.registerForm);
           api.register(this.registerForm.firstName, this.registerForm.lastName, this.registerForm.email, this.registerForm.password)
               .then(() => {
+                console.log("registered.");
                 api.login(this.registerForm.email, this.registerForm.password)
                   .then((res) => {
-                    state.userId = res.data.userId;
-                    state.token = res.data.token;
-                    api.setAuthHeader(state.token);
+                    console.log("logged in.");
+                    sessionStorage.setItem('userId', res.data.userId);
+                    sessionStorage.setItem('token', res.data.token);
+                    api.setAuthHeader(res.data.token);
 
                     if (this.registerForm.profileImage != null) {
                       let header = {
                         'Content-Type': this.registerForm.profileImage.raw.type,
                       };
-
-                      api.setUserImage(res.data.userId, this.registerForm.profileImage.raw, header)
+                      console.log("setting image.");
+                      api.setUserImage(res.data.userId, this.registerForm.profileImage, header)
                         .then(() => {
+                          console.log("image set.");
                           this.$router.push("/events");
                         })
                         .catch((error) => {

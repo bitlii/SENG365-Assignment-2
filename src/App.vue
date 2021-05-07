@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header v-if="!checkAuth()">
+    <el-header v-if="!hasAuth()">
       <el-menu mode="horizontal" :default-active="activeNavIndex" :router="true">
         <el-menu-item index="1" :route="'/'">Login</el-menu-item>
         <el-menu-item index="2" :route="'/register'">Register</el-menu-item>
@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import {state} from "./state";
 import api from "./Api";
 
 export default {
@@ -43,7 +42,9 @@ export default {
     logout: function() {
       api.logout()
         .then(() => {
-          state.resetState();
+          sessionStorage.setItem('userId', null);
+          sessionStorage.setItem('token', null);
+
           this.activeNavIndex = "1";
           this.$router.push("/");
         })
@@ -56,18 +57,17 @@ export default {
 
     },
 
-    checkAuth: function() {
-      return state.token !== "";
+    hasAuth: function() {
+      return sessionStorage.getItem("userId");
     },
 
     setAvatarImage: function() {
-      console.log(state.token);
-      if (this.checkAuth()) {
-        api.getUserImage(state.userId)
+      if (this.hasAuth()) {
+        api.getUserImage(sessionStorage.getItem("userId"))
             .then((res) => {
               this.avatarImage = res.data;
               console.log(this.avatarImage);
-            });
+            }); // todo: add catch.
         return true;
       }
       return false;

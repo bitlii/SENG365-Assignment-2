@@ -26,7 +26,6 @@
 
 <script>
 import api from "../Api";
-import {state} from "../state";
 
 export default {
   name: "Login",
@@ -44,9 +43,10 @@ export default {
     login: function() {
       api.login(this.loginForm.email, this.loginForm.password)
           .then((res) => {
-            state.userId = res.data.userId;
-            state.token = res.data.token;
-            api.setAuthHeader(state.token);
+            sessionStorage.setItem("userId", res.data.userId);
+            sessionStorage.setItem("token", res.data.token);
+
+            api.setAuthHeader(res.data.userId);
             this.$router.push("/events");
 
           })
