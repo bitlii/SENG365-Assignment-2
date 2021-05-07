@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header v-if="!hasAuth()">
+    <el-header v-if="$route.path === '/' || $route.path === '/register'">
       <el-menu mode="horizontal" :default-active="activeNavIndex" :router="true">
         <el-menu-item index="1" :route="'/'">Login</el-menu-item>
         <el-menu-item index="2" :route="'/register'">Register</el-menu-item>
@@ -32,6 +32,7 @@ export default {
 
   data: function() {
     return {
+      isLoggedIn: false,
       activeNavIndex: "1",
 
       avatarImage: null,
@@ -42,8 +43,8 @@ export default {
     logout: function() {
       api.logout()
         .then(() => {
-          sessionStorage.setItem('userId', null);
-          sessionStorage.setItem('token', null);
+          sessionStorage.removeItem("userId")
+          sessionStorage.removeItem("token")
 
           this.activeNavIndex = "1";
           this.$router.push("/");
@@ -52,17 +53,13 @@ export default {
           if (error.response.status === 401) {
             this.$message.error("You must be logged in to logout.");
           }
-          console.log(error);
+          console.log(error.response);
         });
 
     },
 
-    hasAuth: function() {
-      return sessionStorage.getItem("userId");
-    },
-
     setAvatarImage: function() {
-      if (this.hasAuth()) {
+      if (sessionStorage.getItem("userId") != null) {
         api.getUserImage(sessionStorage.getItem("userId"))
             .then((res) => {
               this.avatarImage = res.data;
@@ -73,7 +70,6 @@ export default {
       return false;
     },
   },
-
 }
 
 </script>

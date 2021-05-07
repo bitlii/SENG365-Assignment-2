@@ -7,21 +7,29 @@ const instance = axios.create({
 });
 
 export default {
-    // Users
+    // === Users === //
     register: (firstName, lastName, email, password) => instance.post("/users/register", {firstName, lastName, email, password}),
 
     login: (email, password) => instance.post("/users/login", {email, password}),
 
-    logout: () => instance.post("/users/logout"),
+    logout: () => instance.post("/users/logout", [],{headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
-    // User Image
-    setUserImage: (id, image, imageHeader) => instance.put(`/users/${id}/image`, {image}, {headers: imageHeader}),
+    // === User Image === //
+    setUserImage: (id, image, headers) => instance.put(`/users/${id}/image`, {image}, {headers: headers}),
 
-    getUserImage: (id) => instance.get(`/users/${id}/image`),
+    getUserImage: (id) => instance.get(`/users/${id}/image`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
-    // Other
-    setAuthHeader(token) {
-        instance.defaults.headers.common['X-Authorization'] = token;
+    // === Events === //
+
+    getAllEvents: () => instance.get("/events", {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
+    // === Event Images === //
+
+    getEventImage: function(eventId) {
+        return `${SERVER_URL}/events/${eventId}/image`;
     },
+
+
+
 
 }

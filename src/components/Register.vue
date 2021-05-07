@@ -125,11 +125,12 @@ export default {
                     api.setAuthHeader(res.data.token);
 
                     if (this.registerForm.profileImage != null) {
-                      let header = {
+                      let headers = {
+                        'X-Authorization': sessionStorage.getItem("token"),
                         'Content-Type': this.registerForm.profileImage.raw.type,
                       };
                       console.log("setting image.");
-                      api.setUserImage(res.data.userId, this.registerForm.profileImage, header)
+                      api.setUserImage(res.data.userId, this.registerForm.profileImage, headers)
                         .then(() => {
                           console.log("image set.");
                           this.$router.push("/events");

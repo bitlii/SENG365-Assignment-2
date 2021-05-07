@@ -46,7 +46,6 @@ export default {
             sessionStorage.setItem("userId", res.data.userId);
             sessionStorage.setItem("token", res.data.token);
 
-            api.setAuthHeader(res.data.userId);
             this.$router.push("/events");
 
           })
