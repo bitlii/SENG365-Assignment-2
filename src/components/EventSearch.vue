@@ -10,9 +10,10 @@
 
     <el-divider></el-divider>
 
+    <!-- Event List Container -->
     <div id="event-container">
-
-      <el-card class="event-card" v-for="event in eventsList" :key="event.eventId" :body-style="{ padding: '0px' }">
+      <!-- Event Card Container -->
+      <el-card class="event-card" v-for="event in eventsList" :key="event.eventId" :body-style="{ padding: '0px', height: '100%', justifyContent: 'flex-end'}">
         <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
           <template #error>
             <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
@@ -25,23 +26,26 @@
           <div class="event-title">
             {{ event.title }}
           </div>
-          <div class="tags">
-           <el-tag class="tag">Film</el-tag>
-           <el-tag class="tag">Entertainment</el-tag>
+          <div class="tags" >
+           <el-tag class="tag" size="small" v-for="cat in getEventCategories(event.categories)" :key="cat">{{ cat.name }}</el-tag>
           </div>
-
           <el-divider>
             <div v-if="event.capacity != null">{{ event.numAcceptedAttendees }}/{{ event.capacity }} Attendees</div>
             <div v-else>{{ event.numAcceptedAttendees }} Attendees</div>
           </el-divider>
+
           <div class="host-container">
             <el-avatar></el-avatar>
             <div class="host-name">
               {{ event.organizerFirstName }} {{ event.organizerLastName }}
             </div>
           </div>
-
         </div>
+
+
+
+
+
       </el-card>
 
 
@@ -59,6 +63,7 @@ export default {
   data: function() {
     return {
       eventsList: [],
+      eventCategories: [],
 
       searchQuery: "",
       count: 15,
@@ -83,6 +88,21 @@ export default {
     getEventImage:  function(eventId) {
       console.log(api.getEventImage(eventId));
       return api.getEventImage(eventId);
+    },
+
+    getEventCategories: function(eventCategories) {
+      return this.eventCategories.filter(category => eventCategories.includes(category.id));
+    },
+
+    getAllCategories: function() {
+      api.getEventCategories()
+        .then((res) => {
+          this.eventCategories = res.data;
+          console.log("retrieved event categories.");
+        })
+        .catch((error) => {
+          console.log("internal server error getting event categories: " + error);
+        });
     }
 
   },
@@ -92,6 +112,7 @@ export default {
       this.$message.error("You must log in first.");
       this.$router.push("/");
     }
+    this.getAllCategories();
     this.getAllEvents();
 
   }
@@ -109,7 +130,7 @@ export default {
   .info-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(auto-fit, auto);
+    grid-template-rows: repeat(auto-fit, 1fr);
 
     padding: 20px;
   }
@@ -124,8 +145,8 @@ export default {
   }
 
   .event-title {
-    padding: 1em;
     font-size: 20px;
+    padding: 1em;
   }
 
   .tag {

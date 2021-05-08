@@ -23,6 +23,8 @@ export default {
 
     getAllEvents: () => instance.get("/events", {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
+    getEventCategories: () => instance.get("/events/categories"),
+
     // === Event Images === //
 
     getEventImage: function(eventId) {
