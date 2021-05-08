@@ -10,10 +10,10 @@
       <el-menu mode="horizontal" :default-active="activeNavIndex" :router="true">
         <el-menu-item @click="logout()">Logout</el-menu-item>
         <el-menu-item index="1" :route="'/events'">Events</el-menu-item>
-        <el-menu-item index="2" :route="'/user'">Profile</el-menu-item>
-        <el-menu-item v-if="setAvatarImage()">
-          <el-avatar id="avatar" :src="avatarImage"></el-avatar>
-        </el-menu-item>
+        <el-menu-item index="2" :route="`/users/${getLoggedInUserId()}`">Profile</el-menu-item>
+<!--        <el-menu-item v-if="setAvatarImage()">-->
+<!--          <el-avatar id="avatar" :src="avatarImage"></el-avatar>-->
+<!--        </el-menu-item>-->
 
       </el-menu>
     </el-header>
@@ -58,6 +58,10 @@ export default {
 
     },
 
+    getLoggedInUserId: function() {
+      return sessionStorage.getItem("userId");
+    },
+
     setAvatarImage: function() {
       if (sessionStorage.getItem("userId") != null) {
         api.getUserImage(sessionStorage.getItem("userId"))
@@ -70,6 +74,18 @@ export default {
       return false;
     },
   },
+
+  // watch: {
+  //   $route (to) {
+  //     console.log("PATH:" + to.path);
+  //     this.activeNavIndex = to.path;
+  //   }
+  // },
+  //
+  // mounted: function() {
+  //   this.activeNavIndex = this.$route.path;
+  // }
+
 }
 
 </script>

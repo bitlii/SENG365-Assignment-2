@@ -14,14 +14,20 @@ export default {
 
     logout: () => instance.post("/users/logout", [],{headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
+    getUser: (id) => instance.get(`/users/${id}`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
     // === User Image === //
     setUserImage: (id, image, headers) => instance.put(`/users/${id}/image`, {image}, {headers: headers}),
 
-    getUserImage: (id) => instance.get(`/users/${id}/image`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+    getUserImage: function(id) {
+        return `${SERVER_URL}/users/${id}/image`;
+    },
 
     // === Events === //
 
     getAllEvents: () => instance.get("/events", {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
+    searchEvents: (queries) => instance.get("/events", {params: queries}),
 
     getEventCategories: () => instance.get("/events/categories"),
 

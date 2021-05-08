@@ -1,9 +1,9 @@
 <template>
   <el-card class="container">
     <el-header>
-      <el-input placeholder="Search for events" v-model="searchQuery">
+      <el-input placeholder="Search for events" @keyup.enter="searchEvents()" v-model="searchQuery">
         <template #append>
-          <el-button icon="el-icon-search"></el-button>
+          <el-button icon="el-icon-search" @click="searchEvents()"></el-button>
         </template>
       </el-input>
     </el-header>
@@ -85,8 +85,27 @@ export default {
         });
     },
 
+    searchEvents: function() {
+      let params = {};
+
+      if (this.searchQuery !== "") {
+        params.q = this.searchQuery;
+      }
+
+      console.log(params);
+      api.searchEvents(params)
+        .then((res) => {
+          this.eventsList = res.data;
+        })
+        .catch((error) => {
+          if (error.response.status === 400) {
+            this.$message.error("Bad search. Please try again.");
+          }
+          console.log(error);
+        });
+    },
+
     getEventImage:  function(eventId) {
-      console.log(api.getEventImage(eventId));
       return api.getEventImage(eventId);
     },
 
