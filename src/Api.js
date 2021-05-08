@@ -31,6 +31,12 @@ export default {
 
     getEventCategories: () => instance.get("/events/categories"),
 
+    getEvent: (id) => instance.get(`/events/${id}`),
+
+    // === Event Attendees === //
+
+    getEventAttendees: (id) => instance.get(`/events/${id}/attendees`),
+
     // === Event Images === //
 
     getEventImage: function(eventId) {

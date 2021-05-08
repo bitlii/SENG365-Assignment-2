@@ -1,20 +1,26 @@
 <template>
   <el-container>
     <el-header v-if="$route.path === '/' || $route.path === '/register'">
-      <el-menu mode="horizontal" :default-active="activeNavIndex" :router="true">
+      <el-menu
+          class="nav-menu"
+          mode="horizontal"
+          :default-active="activeNavIndex"
+          :router="true"
+          text-color="#FFFFFF"
+          active-text-color="#FFFFFF"
+          background-color="#303443">
         <el-menu-item index="1" :route="'/'">Login</el-menu-item>
         <el-menu-item index="2" :route="'/register'">Register</el-menu-item>
       </el-menu>
     </el-header>
     <el-header v-else>
-      <el-menu mode="horizontal" :default-active="activeNavIndex" :router="true">
+      <el-menu class="nav-menu"  mode="horizontal" :default-active="activeNavIndex" :router="true"
+               text-color="#FFFFFF"
+               active-text-color="#FFFFFF"
+               background-color="#303443">
         <el-menu-item @click="logout()">Logout</el-menu-item>
         <el-menu-item index="1" :route="'/events'">Events</el-menu-item>
         <el-menu-item index="2" :route="`/users/${getLoggedInUserId()}`">Profile</el-menu-item>
-<!--        <el-menu-item v-if="setAvatarImage()">-->
-<!--          <el-avatar id="avatar" :src="avatarImage"></el-avatar>-->
-<!--        </el-menu-item>-->
-
       </el-menu>
     </el-header>
 
@@ -62,34 +68,26 @@ export default {
       return sessionStorage.getItem("userId");
     },
 
-    setAvatarImage: function() {
-      if (sessionStorage.getItem("userId") != null) {
-        api.getUserImage(sessionStorage.getItem("userId"))
-            .then((res) => {
-              this.avatarImage = res.data;
-              console.log(this.avatarImage);
-            }); // todo: add catch.
-        return true;
-      }
-      return false;
-    },
+    // setAvatarImage: function() {
+    //   if (sessionStorage.getItem("userId") != null) {
+    //     api.getUserImage(sessionStorage.getItem("userId"))
+    //         .then((res) => {
+    //           this.avatarImage = res.data;
+    //           console.log(this.avatarImage);
+    //         });
+    //     return true;
+    //   }
+    //   return false;
+    // },
   },
-
-  // watch: {
-  //   $route (to) {
-  //     console.log("PATH:" + to.path);
-  //     this.activeNavIndex = to.path;
-  //   }
-  // },
-  //
-  // mounted: function() {
-  //   this.activeNavIndex = this.$route.path;
-  // }
 
 }
 
 </script>
 
 <style scoped>
+.nav-menu {
+  background: #2C2C2D;
+}
 
 </style>

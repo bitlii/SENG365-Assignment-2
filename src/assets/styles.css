@@ -3,7 +3,7 @@
 }
 
 body {
-    background: #FFFEFE;
+    background: #303443;
 }
 
 .container {
@@ -12,4 +12,8 @@ body {
     padding: 1em;
     margin: auto;
     text-align: center;
+}
+
+.secondary-text {
+    color: #909399;
 }

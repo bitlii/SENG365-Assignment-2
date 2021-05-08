@@ -5,10 +5,11 @@ import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 import axios from 'axios';
 import "./assets/styles.css" // Global CSS
-import Register from "@/components/Register";
-import Login from "@/components/Login";
-import User from "@/components/User";
-import EventSearch from "@/components/EventSearch";
+import Register from "./components/Register";
+import Login from "./components/Login";
+import User from "./components/User";
+import EventSearch from "./components/EventSearch";
+import Event from "./components/Event";
 
 
 const routes = [
@@ -25,9 +26,14 @@ const routes = [
         component: User
     },
     {
+        path: "/events/:id",
+        component: Event
+    },
+    {
         path: "/events",
         component: EventSearch
-    }
+    },
+
 ];
 
 const app = createApp(App);

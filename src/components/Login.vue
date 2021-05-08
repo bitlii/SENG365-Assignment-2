@@ -64,7 +64,7 @@ export default {
 <style scoped>
   #container {
     min-width: 400px;
-    max-width: 800px;
+    max-width: 500px;
     padding: 1em;
     margin: auto;
   }
@@ -101,7 +101,8 @@ export default {
   }
 
   #login-button {
-    text-align: right;
+    padding: 1em;
+    text-align: center;
   }
 
 </style>

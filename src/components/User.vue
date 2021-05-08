@@ -60,11 +60,12 @@ export default {
       this.$router.push("/");
     }
 
-    // if (sessionStorage.getItem("userId") !== this.$route.params.id) {
-    //   this.$message.error("You do not have permission to access this user's page.");
-    //   let userId = sessionStorage.getItem("userId");
-    //   this.$router.push(`/user/${userId}`);
-    // }
+    if (sessionStorage.getItem("userId") !== this.$route.params.id) {
+      this.$message.error("You do not have permission to access this user's page.");
+      let userId = sessionStorage.getItem("userId");
+      this.$router.push(`/users/${userId}`);
+    }
+
     this.getUser();
   }
 
@@ -72,6 +73,10 @@ export default {
 </script>
 
 <style scoped>
+  .container {
+    width: 500px;
+  }
+
   #image-container {
     text-align: center;
 

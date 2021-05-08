@@ -227,7 +227,7 @@ export default {
 
   #create-button {
     grid-column: 3;
-    text-align: right;
+    text-align: center;
   }
 
   /* Image Upload Styling */

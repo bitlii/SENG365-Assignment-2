@@ -13,7 +13,12 @@
     <!-- Event List Container -->
     <div id="event-container">
       <!-- Event Card Container -->
-      <el-card class="event-card" v-for="event in eventsList" :key="event.eventId" :body-style="{ padding: '0px', height: '100%', justifyContent: 'flex-end'}">
+      <el-card class="event-card"
+               v-for="event in eventsList"
+               :key="event.eventId"
+               :body-style="{ padding: '0px', height: '100%'}"
+               shadow="hover"
+               @click="goToEvent(event.eventId)">
         <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
           <template #error>
             <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
@@ -42,13 +47,7 @@
           </div>
         </div>
 
-
-
-
-
       </el-card>
-
-
     </div>
 
   </el-card>
@@ -122,15 +121,20 @@ export default {
         .catch((error) => {
           console.log("internal server error getting event categories: " + error);
         });
-    }
+    },
 
+    goToEvent: function(eventId) {
+      this.$router.push(`/events/${eventId}`);
+    },
   },
 
   mounted: function() {
+    console.log("wellness check 2");
     if (sessionStorage.getItem("token") == null) {
       this.$message.error("You must log in first.");
       this.$router.push("/");
     }
+
     this.getAllCategories();
     this.getAllEvents();
 
@@ -156,6 +160,7 @@ export default {
 
   .event-card {
     margin: 0.5em 0.5em;
+    cursor: pointer;
   }
 
   .event-image {
