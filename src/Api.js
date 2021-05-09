@@ -52,6 +52,8 @@ export default {
         return `${SERVER_URL}/events/${eventId}/image`;
     },
 
+    setEventImage: (id, image, imageHeaders) => instance.put(`/events/${id}/image`, {image}, {headers: imageHeaders}),
+
 
 
 

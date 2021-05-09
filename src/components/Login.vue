@@ -15,7 +15,7 @@
         </el-form-item>
 
         <el-footer id="login-button">
-          <el-button type="primary" @click="login()" round>Login</el-button>
+          <el-button type="primary" @click="login()">Login</el-button>
         </el-footer>
 
       </el-form>

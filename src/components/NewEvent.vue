@@ -31,10 +31,6 @@
         </el-form-item>
       </div>
 
-      <el-divider></el-divider>
-
-      <el-header> Additional Options </el-header>
-
       <!-- Optional Fields -->
       <div id="fee-date-row">
         <el-form-item>
@@ -56,6 +52,16 @@
           <el-switch v-model="eventForm.requireAttendanceControl"></el-switch>
         </el-form-item>
       </div>
+
+      <el-upload
+          class="image-uploader"
+          action="#"
+          :show-file-list="false"
+          :auto-upload="false"
+          :on-change="toggleImage">
+        <img v-if="eventForm.image" :src="eventForm.image" class="image" />
+        <i v-else class="el-icon-plus image-uploader-icon"></i>
+      </el-upload>
 
 
       <el-button type="primary" @click="createEvent('eventForm')"> Create </el-button>
@@ -121,6 +127,9 @@ export default {
         isOnline: false,
         requireAttendanceControl: false,
         fee: null,
+
+        image: null,
+        imageRaw: null,
       },
       eventCategories: [],
 
@@ -168,6 +177,12 @@ export default {
 
     },
 
+    toggleImage: function(file) {
+      console.log(file);
+      this.eventForm.image = URL.createObjectURL(file.raw);
+      this.eventForm.imageRaw = file.raw;
+    },
+
     createEvent: function(eventForm) {
       this.$refs[eventForm].validate((isValid) => {
         if (isValid) {
@@ -182,7 +197,24 @@ export default {
               this.eventForm.venue, this.eventForm.capacity,
               this.eventForm.requireAttendanceControl, this.eventForm.fee)
             .then((res) => {
-              this.$router.push(`/events/${res.data.eventId}`);
+              if (this.eventForm.image != null) {
+                let headers = {
+                  'X-Authorization': sessionStorage.getItem("token"),
+                  'Content-Type': this.eventForm.imageRaw.type,
+                };
+                api.setEventImage(res.data.eventId, this.eventForm.imageRaw, headers)
+                  .then(() => {
+                    this.$router.push(`/events/${res.data.eventId}`);
+                  })
+                  .catch((error) => {
+                    this.$message.error(error.response.statusText);
+                    console.log(error);
+                  });
+
+              }
+              else {
+                this.$router.push(`/events/${res.data.eventId}`);
+              }
             })
             .catch((error) => {
               console.log(error);
@@ -245,6 +277,30 @@ export default {
     grid-template-rows: 1fr;
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 1em;
+  }
+
+  .image-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .image-uploader .el-upload:hover {
+    border-color: #409eff;
+  }
+  .image-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .image {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 
 </style>
