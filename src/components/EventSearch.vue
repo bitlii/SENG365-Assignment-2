@@ -25,6 +25,9 @@
         <el-select v-model="filterCategoryIds" placeholder="Categories" @change="searchEvents()" multiple collapse-tags filterable>
           <el-option v-for="cat in eventCategories" :key="cat.id" :label="cat.name" :value="cat.id"></el-option>
         </el-select>
+        <el-tooltip class="item" effect="dark" content="Events you are hosting or accepted to." placement="top-start">
+          <el-button type="primary" @click="getUserEvents()">Your Events</el-button>
+        </el-tooltip>
       </div>
 
       <el-divider direction="vertical" style="grid-row: 2; grid-column: 2; margin: auto"> </el-divider>
@@ -92,6 +95,7 @@ export default {
       searchQuery: "",
       sortBy: "DATE",
       sortByDirection: "_ASC",
+      organizerId: -1,
       filterCategoryIds: [],
       count: 15,
 
@@ -128,6 +132,10 @@ export default {
 
       if (this.searchQuery !== "") {
         params.q = this.searchQuery;
+      }
+
+      if (this.organizerId !== -1) {
+        params.organizerId = this.organizerId;
       }
 
       if (this.filterCategoryIds.length !== 0) {
@@ -183,13 +191,21 @@ export default {
         });
     },
 
+    getUserEvents: function() {
+      this.organizerId = sessionStorage.getItem("userId");
+      this.searchQuery = "";
+      this.filterCategoryIds = [];
+      this.searchEvents();
+
+    },
+
     goToEvent: function(eventId) {
       this.$router.push(`/events/${eventId}`);
     },
+
   },
 
   mounted: function() {
-    console.log("wellness check 2");
     if (sessionStorage.getItem("token") == null) {
       this.$message.error("You must log in first.");
       this.$router.push("/");
@@ -225,6 +241,11 @@ export default {
     display: inline-flex;
     justify-content: flex-start;
 
+  }
+
+  #filter-container {
+    display: inline-flex;
+    justify-content: space-between;
   }
 
   .info-container {
