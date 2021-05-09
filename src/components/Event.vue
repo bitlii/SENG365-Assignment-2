@@ -11,7 +11,7 @@
               <i class="el-icon-money"></i> Free Event
             </div>
             <div v-else>
-              <i class="el-icon-money"></i> Fee: {{ event.fee }}
+              <i class="el-icon-money"></i> Fee: ${{ event.fee }}
             </div>
           </div>
         </div>
@@ -40,7 +40,6 @@
           </div>
         </div>
       </div>
-
 
       <el-divider></el-divider>
 
@@ -72,6 +71,13 @@
           <i class="el-icon-link"></i>
           <a :href="event.url">{{ event.url }}</a>
         </div>
+      </div>
+
+      <el-divider></el-divider>
+
+      <div>
+        <el-button type="primary" :disabled="!checkAttendanceEligibility()" @click="requestAttendance()">
+          {{ attendanceButtonText }}</el-button>
       </div>
 
       <el-divider></el-divider>
@@ -113,8 +119,12 @@ export default {
   data: function() {
     return {
       event: null,
-      eventCategories: [],
+      allCategories: [],
       attendees: [],
+
+      status: "",
+
+      attendanceButtonText: "Request to Join",
 
     }
   },
@@ -142,7 +152,7 @@ export default {
     getAllCategories: function() {
       api.getEventCategories()
           .then((res) => {
-            this.eventCategories = res.data;
+            this.allCategories = res.data;
             console.log("retrieved event categories.");
           })
           .catch((error) => {
@@ -151,7 +161,7 @@ export default {
     },
 
     getEventCategories: function(eventCategories) {
-      return this.eventCategories.filter(category => eventCategories.includes(category.id));
+      return this.allCategories.filter(category => eventCategories.includes(category.id));
     },
 
     getHostImage: function(userId) {
@@ -162,6 +172,13 @@ export default {
       api.getEventAttendees(this.$route.params.id)
         .then((res) => {
           this.attendees = res.data;
+          let loggedInId = parseInt(sessionStorage.getItem("userId"));
+
+          let filtered = this.attendees.filter(attendee => attendee.attendeeId === loggedInId);
+          if (filtered.length !== 0) {
+            this.status = filtered[0].status;
+          }
+
           console.log(this.attendees);
         })
         .catch((error) => {
@@ -173,8 +190,70 @@ export default {
     },
 
     getAttendeeImage: function(userId) {
-      console.log("ID IMAGE: " + userId);
       return api.getUserImage(userId);
+    },
+
+    checkAttendanceEligibility: function() {
+      if (new Date(this.event.date) < Date.now()) {
+        this.attendanceButtonText = "This event is already over";
+        return false;
+      }
+
+      if (sessionStorage.getItem("token") == null) {
+        this.attendanceButtonText = "Login to join";
+        return false;
+      }
+
+      if (this.status === "pending") {
+        this.attendanceButtonText = "Request Pending";
+        return false;
+      }
+
+      if (this.status === "accepted") {
+        this.attendanceButtonText = "Joined";
+        return false;
+      }
+
+      if (this.event.capacity == null) {
+        this.attendanceButtonText = this.event.requiresAttendanceControl === 1 ?  "Request to Join" : "Join";
+        return true;
+      }
+
+      if (this.event.attendeeCount < this.event.capacity) {
+        this.attendanceButtonText = this.event.requiresAttendanceControl === 1 ?  "Request to Join" : "Join";
+        return true;
+      }
+      else {
+        this.attendanceButtonText = "Event at maximum capacity.";
+        return false;
+      }
+
+    },
+
+    requestAttendance: function() {
+
+
+      api.addAttendance(this.event.id)
+        .then(() => {
+          if (this.event.requiresAttendanceControl === 1) {
+            this.$message.success("Successfully requested to join event.");
+            this.status = "pending";
+          }
+          else {
+            this.$message.success("Successfully joined event.");
+            this.status = "accepted";
+            this.getEvent();
+          }
+
+
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status) {
+            this.$message.error(error.response.statusText);
+          }
+        });
+
     },
 
   },

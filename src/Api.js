@@ -40,7 +40,9 @@ export default {
 
     // === Event Attendees === //
 
-    getEventAttendees: (id) => instance.get(`/events/${id}/attendees`),
+    getEventAttendees: (id) => instance.get(`/events/${id}/attendees`,{headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
+    addAttendance: (id) => instance.post(`/events/${id}/attendees`, {}, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
     // === Event Images === //
 
