@@ -38,45 +38,89 @@
 
     <el-divider></el-divider>
 
-    <!-- Event List Container -->
-    <div id="event-container">
-      <!-- Event Card Container -->
-      <el-card class="event-card"
-               v-for="event in eventsList"
-               :key="event.eventId"
-               :body-style="{ padding: '0px', height: '100%'}"
-               shadow="hover"
-               @click="goToEvent(event.eventId)">
-        <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
-          <template #error>
-            <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
-          </template>
-        </el-image>
-        <div class="info-container">
-          <div class="date">
-            {{ event.date }}
-          </div>
-          <div class="event-title">
-            {{ event.title }}
-          </div>
-          <div class="tags" >
-           <el-tag class="tag" size="small" v-for="cat in getEventCategories(event.categories)" :key="cat">{{ cat.name }}</el-tag>
-          </div>
-          <el-divider>
-            <div v-if="event.capacity != null">{{ event.numAcceptedAttendees }}/{{ event.capacity }} Attendees</div>
-            <div v-else>{{ event.numAcceptedAttendees }} Attendees</div>
-          </el-divider>
+    <el-tabs type="card" @tab-click="handleTabChange">
+      <el-tab-pane label="All Events">
+        <!-- Event List Container -->
+        <div class="event-container">
+          <!-- Event Card Container -->
+          <el-card class="event-card"
+                   v-for="event in eventsList"
+                   :key="event.eventId"
+                   :body-style="{ padding: '0px', height: '100%'}"
+                   shadow="hover"
+                   @click="goToEvent(event.eventId)">
+            <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
+              <template #error>
+                <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
+              </template>
+            </el-image>
+            <div class="info-container">
+              <div class="date">
+                {{ event.date }}
+              </div>
+              <div class="event-title">
+                {{ event.title }}
+              </div>
+              <div class="tags" >
+                <el-tag class="tag" size="small" v-for="cat in getEventCategories(event.categories)" :key="cat">{{ cat.name }}</el-tag>
+              </div>
+              <el-divider>
+                <div v-if="event.capacity != null">{{ event.numAcceptedAttendees }}/{{ event.capacity }} Attendees</div>
+                <div v-else>{{ event.numAcceptedAttendees }} Attendees</div>
+              </el-divider>
 
-          <div class="host-container">
-            <el-avatar></el-avatar>
-            <div class="host-name">
-              {{ event.organizerFirstName }} {{ event.organizerLastName }}
+              <div class="host-container">
+                <el-avatar></el-avatar>
+                <div class="host-name">
+                  {{ event.organizerFirstName }} {{ event.organizerLastName }}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-      </el-card>
-    </div>
+          </el-card>
+        </div>
+      </el-tab-pane>
+      <!-- Could probably refactor this into a single reusable component. -->
+      <el-tab-pane label="My Events">
+        <div class="event-container">
+          <el-card class="event-card"
+                   v-for="event in eventsList"
+                   :key="event.eventId"
+                   :body-style="{ padding: '0px', height: '100%'}"
+                   shadow="hover"
+                   @click="goToEvent(event.eventId)">
+            <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
+              <template #error>
+                <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
+              </template>
+            </el-image>
+            <div class="info-container">
+              <div class="date">
+                {{ event.date }}
+              </div>
+              <div class="event-title">
+                {{ event.title }}
+              </div>
+              <div class="tags" >
+                <el-tag class="tag" size="small" v-for="cat in getEventCategories(event.categories)" :key="cat">{{ cat.name }}</el-tag>
+              </div>
+              <el-divider>
+                <div v-if="event.capacity != null">{{ event.numAcceptedAttendees }}/{{ event.capacity }} Attendees</div>
+                <div v-else>{{ event.numAcceptedAttendees }} Attendees</div>
+              </el-divider>
+
+              <div class="host-container">
+                <el-avatar></el-avatar>
+                <div class="host-name">
+                  {{ event.organizerFirstName }} {{ event.organizerLastName }}
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
+
 
   </el-card>
 </template>
@@ -199,6 +243,17 @@ export default {
 
     },
 
+
+    handleTabChange: function(tab) {
+      if (tab.index === "0") {
+        this.getAllEvents();
+      }
+      else if (tab.index === "1") {
+        this.getUserEvents();
+      }
+
+    },
+
     goToEvent: function(eventId) {
       this.$router.push(`/events/${eventId}`);
     },
@@ -228,7 +283,7 @@ export default {
     margin-top: 0.5em;
   }
 
-  #event-container {
+  .event-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: repeat(auto-fit, auto);
