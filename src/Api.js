@@ -38,6 +38,8 @@ export default {
             {title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee},
             {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
+    deleteEvent: (id) => instance.delete(`/events/${id}`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
     // === Event Attendees === //
 
     getEventAttendees: (id) => instance.get(`/events/${id}/attendees`,{headers: {"X-Authorization": sessionStorage.getItem("token")}}),

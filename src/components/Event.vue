@@ -75,9 +75,20 @@
 
       <el-divider></el-divider>
 
-      <div>
+      <div v-if="isOrganizer()">
         <el-button type="primary" :disabled="!checkAttendanceEligibility()" @click="requestAttendance()">
           {{ attendanceButtonText }}</el-button>
+      </div>
+      <div v-else>
+        <el-button type="danger" @click="deleteDialogVisible = true">Delete</el-button>
+
+        <el-dialog  width="400px" title="Confirm Deletion" v-model="deleteDialogVisible">
+          Are you sure you want to delete this event?
+          <template #footer>
+            <el-button @click="deleteDialogVisible = false">Cancel</el-button>
+            <el-button type="primary" @click="deleteEvent()">Confirm</el-button>
+          </template>
+        </el-dialog>
       </div>
 
       <el-divider></el-divider>
@@ -121,10 +132,10 @@ export default {
       event: null,
       allCategories: [],
       attendees: [],
-
       status: "",
 
       attendanceButtonText: "Request to Join",
+      deleteDialogVisible: false,
 
     }
   },
@@ -256,6 +267,23 @@ export default {
 
     },
 
+    isOrganizer: function() {
+      return this.event.organizerId === sessionStorage.getItem('userId');
+    },
+
+    deleteEvent: function() {
+      api.deleteEvent(this.event.id)
+        .then(() => {
+          this.deleteDialogVisible = false;
+          this.$message.success("Successfully deleted event.");
+          this.$router.push("/events");
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$message.error(error.response.statusText);
+        });
+    },
+
   },
 
   mounted: function() {
@@ -271,6 +299,7 @@ export default {
   .container {
     width: 50%;
   }
+
 
   /* Header */
   #header {
