@@ -1,5 +1,7 @@
 <template>
   <el-card class="container">
+
+    <!-- Search Box -->
     <el-header>
       <el-input placeholder="Search for events" @keyup.enter="searchEvents()" v-model="searchQuery">
         <template #append>
@@ -7,6 +9,29 @@
         </template>
       </el-input>
     </el-header>
+
+    <div id="advanced-settings-container">
+      <div style="grid-row: 1; grid-column: 1/4;">Filter & Sort Options</div>
+
+      <div id="sort-container">
+        <el-select v-model="sortBy" @change="searchEvents()" size="medium" style="width: 150px">
+          <el-option v-for="sort in sortRules" :key="sort.value" :label="sort.name" :value="sort.value"></el-option>
+        </el-select>
+        <el-select v-model="sortByDirection" @change="searchEvents()" size="medium" style="width: 120px">
+          <el-option v-for="sort in sortDirection" :key="sort.value" :label="sort.name" :value="sort.value"></el-option>
+        </el-select>
+      </div>
+      <div id="filter-container">
+        <el-select v-model="filterCategoryIds" placeholder="Categories" @change="searchEvents()" multiple collapse-tags filterable>
+          <el-option v-for="cat in eventCategories" :key="cat.id" :label="cat.name" :value="cat.id"></el-option>
+        </el-select>
+      </div>
+
+      <el-divider direction="vertical" style="grid-row: 2; grid-column: 2; margin: auto"> </el-divider>
+
+    </div>
+
+
 
     <el-divider></el-divider>
 
@@ -65,7 +90,21 @@ export default {
       eventCategories: [],
 
       searchQuery: "",
+      sortBy: "DATE",
+      sortByDirection: "_ASC",
+      filterCategoryIds: [],
       count: 15,
+
+      sortRules: [
+        {name: "Alphabetical", value:"ALPHABETICAL"},
+        {name: "Attendees", value:"ATTENDEES"},
+        {name: "Capacity", value:"CAPACITY"},
+        {name: "Date", value:"DATE"},
+      ],
+      sortDirection: [
+        {name: "Ascending", value:"_ASC"},
+        {name: "Descending", value:"_DESC"},
+      ],
 
     }
   },
@@ -91,10 +130,20 @@ export default {
         params.q = this.searchQuery;
       }
 
+      if (this.filterCategoryIds.length !== 0) {
+        params.categoryIds = this.filterCategoryIds;
+      }
+
+      if (this.sortBy != null && this.sortByDirection != null) {
+        params.sortBy = this.sortBy.toString() + this.sortByDirection.toString();
+      }
+
       console.log(params);
       api.searchEvents(params)
         .then((res) => {
           this.eventsList = res.data;
+          // this.getOnlyCategoryFilterEvents();
+          console.log(this.eventsList);
         })
         .catch((error) => {
           if (error.response.status === 400) {
@@ -103,6 +152,17 @@ export default {
           console.log(error);
         });
     },
+
+    // getOnlyCategoryFilterEvents: function() {
+    //   if (this.filterCategoryIds > 0) {
+    //     let array = this.eventsList;
+    //     console.log("FILTERED: " + this.filterCategoryIds);
+    //     for (let catId in this.filterCategoryIds) {
+    //       array.filter(e => e.categories.includes(catId));
+    //       console.log("TEST: " + array);
+    //     }
+    //   }
+    // },
 
     getEventImage:  function(eventId) {
       return api.getEventImage(eventId);
@@ -136,7 +196,7 @@ export default {
     }
 
     this.getAllCategories();
-    this.getAllEvents();
+    this.searchEvents();
 
   }
 
@@ -144,10 +204,27 @@ export default {
 </script>
 
 <style scoped>
+  #advanced-settings-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 0.25fr 1fr;
+
+    margin-top: 0.5em;
+  }
+
   #event-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: repeat(auto-fit, auto);
+  }
+
+  #sort-container {
+    grid-row: 2;
+    grid-column: 1;
+
+    display: inline-flex;
+    justify-content: flex-start;
+
   }
 
   .info-container {
