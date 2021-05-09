@@ -47,7 +47,7 @@
       <div id="image-container">
         <el-image id="event-image" :src="getEventImage()">
           <template #error>
-            <el-avatar icon="el-icon-user-solid" :size="200" shape="square"></el-avatar>
+            <el-avatar icon="el-icon-picture" :size="200" shape="square"></el-avatar>
           </template>
         </el-image>
       </div>
@@ -124,7 +124,9 @@ export default {
       api.getEvent(this.$route.params.id)
         .then((res) => {
           this.event = res.data;
-
+          if (this.event.attendeeCount == null) {
+            this.event.attendeeCount = 0;
+          }
           console.log(this.event);
         })
         .catch((error) => {

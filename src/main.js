@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import User from "./components/User";
 import EventSearch from "./components/EventSearch";
 import Event from "./components/Event";
+import NewEvent from "./components/NewEvent";
 
 
 const routes = [
@@ -33,6 +34,10 @@ const routes = [
         path: "/events",
         component: EventSearch
     },
+    {
+        path: "/events/create",
+        component: NewEvent
+    }
 
 ];
 

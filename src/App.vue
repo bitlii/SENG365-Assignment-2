@@ -14,19 +14,29 @@
       </el-menu>
     </el-header>
     <el-header v-else>
-      <el-menu class="nav-menu"  mode="horizontal" :default-active="activeNavIndex" :router="true"
+      <el-menu class="nav-menu"
+               mode="horizontal"
+               :default-active="activeNavIndex"
+               :router="true"
                text-color="#FFFFFF"
                active-text-color="#FFFFFF"
                background-color="#303443">
         <el-menu-item @click="logout()">Logout</el-menu-item>
         <el-menu-item index="1" :route="'/events'">Events</el-menu-item>
-        <el-menu-item index="2" :route="`/users/${getLoggedInUserId()}`">Profile</el-menu-item>
+
+        <el-submenu index="2">
+          <template #title> My Events </template>
+          <el-menu-item index="2-1" :route="'/events/create'"> Create New Event </el-menu-item>
+        </el-submenu>
+
+        <el-menu-item index="3" :route="`/users/${getLoggedInUserId()}`">Profile</el-menu-item>
       </el-menu>
     </el-header>
 
     <el-main>
       <router-view></router-view>
     </el-main>
+
   </el-container>
 </template>
 
@@ -40,8 +50,6 @@ export default {
     return {
       isLoggedIn: false,
       activeNavIndex: "1",
-
-      avatarImage: null,
     }
   },
 
