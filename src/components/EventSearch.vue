@@ -79,6 +79,14 @@
 
           </el-card>
         </div>
+        <el-pagination
+            @current-change="handlePageChange"
+            background
+            layout="prev, pager, next"
+            :total="totalEvents"
+            :page-size="count">
+
+        </el-pagination>
       </el-tab-pane>
       <!-- Could probably refactor this into a single reusable component. -->
       <el-tab-pane label="My Events">
@@ -141,7 +149,10 @@ export default {
       sortByDirection: "_ASC",
       organizerId: -1,
       filterCategoryIds: [],
-      count: 15,
+      startIndex: 0,
+      count: 10,
+
+      totalEvents: 10,
 
       sortRules: [
         {name: "Alphabetical", value:"ALPHABETICAL"},
@@ -162,6 +173,7 @@ export default {
       api.getAllEvents()
         .then((res) => {
           this.eventsList = res.data;
+          this.totalEvents = this.eventsList.length;
         })
         .catch((error) => {
           if (error.response.status === 400) {
@@ -189,6 +201,9 @@ export default {
       if (this.sortBy != null && this.sortByDirection != null) {
         params.sortBy = this.sortBy.toString() + this.sortByDirection.toString();
       }
+
+      params.count = this.count;
+      params.startIndex = this.startIndex;
 
       console.log(params);
       api.searchEvents(params)
@@ -243,6 +258,10 @@ export default {
 
     },
 
+    handlePageChange: function(page) {
+      this.startIndex = (page * this.count) - 10;
+      this.searchEvents();
+    },
 
     handleTabChange: function(tab) {
       if (tab.index === "0") {
@@ -267,6 +286,7 @@ export default {
     }
 
     this.getAllCategories();
+    this.getAllEvents();
     this.searchEvents();
 
   }
@@ -285,7 +305,7 @@ export default {
 
   .event-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(auto-fit, auto);
   }
 
