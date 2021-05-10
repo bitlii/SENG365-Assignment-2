@@ -44,7 +44,7 @@
       <el-divider></el-divider>
 
       <div id="image-container">
-        <el-image id="event-image" :src="getEventImage()">
+        <el-image id="event-image" :src="getEventImage(event.id)">
           <template #error>
             <el-avatar icon="el-icon-picture" :size="200" shape="square"></el-avatar>
           </template>
@@ -67,7 +67,7 @@
           <i class="el-icon-location"></i>
           {{ event.venue }}
         </div>
-        <div class="location" v-else>
+        <div class="location" v-if="event.url != null">
           <i class="el-icon-link"></i>
           <a :href="event.url">{{ event.url }}</a>
         </div>
@@ -117,8 +117,51 @@
       </div>
     </el-card>
 
+    <el-card class="container sub-container">
+      <el-header> Similar Events </el-header>
+      <el-scrollbar>
+        <div style="display: flex; flex-direction: row; width:fit-content">
+          <el-card class="event-card"
+                   v-for="event in similarEvents"
+                   :key="event.eventId"
+                   :body-style="{ padding: '0px', height: '100%'}"
+                   shadow="hover"
+                   @click="goToEvent(event.eventId)">
+            <el-image class="event-image" :src="getEventImage(event.eventId)" fit="cover">
+              <template #error>
+                <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
+              </template>
+            </el-image>
+            <div class="info-container">
+              <div class="date">
+                {{ event.date }}
+              </div>
+              <div class="event-title">
+                {{ event.title }}
+              </div>
+              <div class="tags" >
+                <el-tag class="tag" size="small" v-for="cat in getEventCategories(event.categories)" :key="cat">{{ cat.name }}</el-tag>
+              </div>
+              <el-divider>
+                <div v-if="event.capacity != null">{{ event.numAcceptedAttendees }}/{{ event.capacity }} Attendees</div>
+                <div v-else>{{ event.numAcceptedAttendees }} Attendees</div>
+              </el-divider>
+
+              <div class="host-container">
+                <el-avatar></el-avatar>
+                <div class="host-name">
+                  {{ event.organizerFirstName }} {{ event.organizerLastName }}
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </div>
+      </el-scrollbar>
+    </el-card>
+
+
     <!-- Attendees -->
-    <el-card class="container attendees-container">
+    <el-card class="container sub-container attendees-container">
       <el-header>
         Attendees
       </el-header>
@@ -142,6 +185,7 @@
 
 <script>
 import api from "../Api";
+import 'element-plus/lib/theme-chalk/display.css';
 
 export default {
   name: "Event",
@@ -149,6 +193,7 @@ export default {
   data: function() {
     return {
       event: null,
+      similarEvents: [],
       allCategories: [],
       attendees: [],
       requestedAttendees: [],
@@ -169,6 +214,7 @@ export default {
           if (this.event.attendeeCount == null) {
             this.event.attendeeCount = 0;
           }
+          this.getSimilarEvents();
           console.log(this.event);
         })
         .catch((error) => {
@@ -177,8 +223,23 @@ export default {
         });
     },
 
-    getEventImage: function() {
-      return api.getEventImage(this.$route.params.id);
+    getSimilarEvents: function() {
+      let params = {};
+      params.categoryIds = this.event.categories;
+      console.log(params);
+      api.searchEvents(params)
+        .then((res) => {
+          this.similarEvents = res.data.filter(e => e.eventId !== this.event.id && new Date(e.date) >= Date.now());
+
+        })
+        .catch((error) => {
+          this.$message.error("Event page not found.");
+          console.log(error);
+        });
+    },
+
+    getEventImage: function(eventId) {
+      return api.getEventImage(eventId);
     },
 
     getAllCategories: function() {
@@ -473,9 +534,50 @@ export default {
     text-align: left;
   }
 
+  /* Similar Events */
+  .sub-container {
+    margin-top: 1em;
+  }
+
+  .event-card {
+    width: 300px;
+    margin: 0.5em 0.5em;
+    cursor: pointer;
+  }
+
+  .info-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(auto-fit, 1fr);
+
+    padding: 20px;
+  }
+
+  .event-image {
+    width: 100%;
+    height: 250px;
+  }
+
+  .event-title {
+    font-size: 20px;
+    padding: 1em;
+  }
+
+  .tag {
+    margin: 0.5em;
+  }
+
+  .host-container {
+    display: inline-flex;
+    margin: auto;
+  }
+
+  .host-name {
+    margin: auto auto auto 0.5em;
+  }
+
   /** Attendees Styling **/
   .attendees-container {
-    margin-top: 1em;
     margin-bottom: 4em;
   }
 

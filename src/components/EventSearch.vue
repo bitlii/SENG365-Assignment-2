@@ -38,7 +38,7 @@
     <el-tabs type="card" @tab-click="handleTabChange">
       <el-tab-pane label="All Events">
         <!-- Event List Container -->
-        <div class="event-container">
+        <div class="event-container" v-loading="eventLoading">
           <!-- Event Card Container -->
           <el-card class="event-card"
                    v-for="event in eventsList"
@@ -88,7 +88,7 @@
       <!-- Could probably refactor this into a single reusable component. -->
       <el-tab-pane label="My Events">
         <div class="event-container">
-          <el-card class="event-card"
+          <el-card class="event-card flex-content"
                    v-for="event in eventsList"
                    :key="event.eventId"
                    :body-style="{ padding: '0px', height: '100%'}"
@@ -140,8 +140,9 @@ export default {
     return {
       allEvents: [], // contains every every from the request.
       eventsList: [], // contains only the currently viewable/paginated events.
-
       eventCategories: [],
+
+      eventLoading: true,
 
       searchQuery: "",
       sortBy: "DATE",
@@ -150,7 +151,6 @@ export default {
       filterCategoryIds: [],
       startIndex: 0,
       count: 10,
-
       totalEvents: 10,
 
       sortRules: [
@@ -169,6 +169,7 @@ export default {
 
   methods: {
     searchEvents: function() {
+      this.eventLoading = true;
       let params = {};
 
       if (this.searchQuery !== "") {
@@ -196,6 +197,7 @@ export default {
           this.totalEvents = this.allEvents.length;
           this.eventsList = this.eventsList.filter(event => new Date(event.date) >= Date.now());
           // this.getOnlyCategoryFilterEvents();
+          this.eventLoading = false;
 
         })
         .catch((error) => {
@@ -290,6 +292,7 @@ export default {
 
   .event-container {
     display: grid;
+    min-height: 100px;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(auto-fit, auto);
   }
