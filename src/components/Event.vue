@@ -82,9 +82,8 @@
         <el-button type="danger" v-if="checkCanLeave()" @click="leaveEvent()">
           Leave</el-button>
       </div>
-      <div v-else>
+      <div v-else style="display:flex; justify-content: space-around">
         <el-button type="danger" @click="deleteDialogVisible = true">Delete</el-button>
-
         <el-dialog  width="400px" title="Confirm Deletion" v-model="deleteDialogVisible">
           Are you sure you want to delete this event?
           <template #footer>
@@ -92,6 +91,23 @@
             <el-button type="primary" @click="deleteEvent()">Confirm</el-button>
           </template>
         </el-dialog>
+
+        <el-button type="primary" @click="attendanceDrawerVisible = true">Manage Attendance</el-button>
+        <el-drawer v-model="attendanceDrawerVisible" title="Manage Attendee Requests" size="40%">
+          <el-table :data="requestedAttendees" id="request-attendees-table">
+            <el-table-column prop="firstName" label="First Name"></el-table-column>
+            <el-table-column  prop="lastName" label="Last Name"></el-table-column>
+            <el-table-column width="150px" label="Action" fixed="right">
+              <template #default="props">
+                <el-button-group style="display: inline-flex;">
+                  <el-button type="success" size="small" @click="changeAttendeeStatus(props.row, 'accepted')">Accept</el-button>
+                  <el-button type="danger" size="small" @click="changeAttendeeStatus(props.row, 'rejected')">Reject</el-button>
+                </el-button-group></template>
+
+            </el-table-column>
+          </el-table>
+
+        </el-drawer>
       </div>
 
       <el-divider></el-divider>
@@ -135,10 +151,12 @@ export default {
       event: null,
       allCategories: [],
       attendees: [],
+      requestedAttendees: [],
       status: "",
 
       attendanceButtonText: "Request to Join",
       deleteDialogVisible: false,
+      attendanceDrawerVisible: false,
 
     }
   },
@@ -191,6 +209,11 @@ export default {
           let filtered = this.attendees.filter(attendee => attendee.attendeeId === loggedInId);
           if (filtered.length !== 0) {
             this.status = filtered[0].status;
+          }
+
+          if (this.isOrganizer()) {
+            this.requestedAttendees = this.attendees.filter(attendee => attendee.status === "pending");
+            this.attendees = this.attendees.filter(attendee => attendee.status !== "rejected");
           }
 
           console.log(this.attendees);
@@ -313,11 +336,22 @@ export default {
 
     },
 
+    changeAttendeeStatus: function(attendee, status) {
+      api.changeAttendeeStatus(this.event.id, attendee.attendeeId, status)
+        .then(() => {
+          this.getAttendees();
+          if (status === "accepted") this.event.attendeeCount++;
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status) {
+            this.$message.error(error.response.statusText);
+          }
+        });
+    },
+
     isOrganizer: function() {
-      console.log("SESS " + sessionStorage.getItem("userId"));
-      console.log("EVENT ID " + this.event.organizerId);
-      console.log(this.event.organizerId === sessionStorage.getItem("userId"));
-      return this.event.organizerId === sessionStorage.getItem("userId");
+      return this.event.organizerId === parseInt(sessionStorage.getItem("userId"));
     },
 
     deleteEvent: function() {
@@ -443,6 +477,11 @@ export default {
   .attendees-container {
     margin-top: 1em;
     margin-bottom: 4em;
+  }
+
+  #request-attendees-table {
+    width: 90%;
+    margin: auto;
   }
 
 

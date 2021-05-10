@@ -25,9 +25,6 @@
         <el-select v-model="filterCategoryIds" placeholder="Categories" @change="searchEvents()" multiple collapse-tags filterable>
           <el-option v-for="cat in eventCategories" :key="cat.id" :label="cat.name" :value="cat.id"></el-option>
         </el-select>
-        <el-tooltip class="item" effect="dark" content="Events you are hosting or accepted to." placement="top-start">
-          <el-button type="primary" @click="getUserEvents()">Your Events</el-button>
-        </el-tooltip>
       </div>
 
       <el-divider direction="vertical" style="grid-row: 2; grid-column: 2; margin: auto"> </el-divider>
