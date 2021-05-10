@@ -75,9 +75,12 @@
 
       <el-divider></el-divider>
 
-      <div v-if="isOrganizer()">
+      <!-- ACTIONS SECTION -->
+      <div v-if="!isOrganizer()">
         <el-button type="primary" :disabled="!checkAttendanceEligibility()" @click="requestAttendance()">
           {{ attendanceButtonText }}</el-button>
+        <el-button type="danger" v-if="checkCanLeave()" @click="leaveEvent()">
+          Leave</el-button>
       </div>
       <div v-else>
         <el-button type="danger" @click="deleteDialogVisible = true">Delete</el-button>
@@ -204,6 +207,29 @@ export default {
       return api.getUserImage(userId);
     },
 
+    checkCanLeave: function() {
+      if (new Date(this.event.date) < Date.now()) {
+        return false;
+      }
+
+      if (sessionStorage.getItem("token") == null) {
+        return false;
+      }
+
+      if (this.status === "pending") {
+        return true;
+      }
+
+      if (this.status === "accepted") {
+        return true;
+      }
+
+      if (this.status === "rejected") {
+        return false;
+      }
+
+    },
+
     checkAttendanceEligibility: function() {
       if (new Date(this.event.date) < Date.now()) {
         this.attendanceButtonText = "This event is already over";
@@ -225,6 +251,11 @@ export default {
         return false;
       }
 
+      if (this.status === "rejected") {
+        this.attendanceButtonText = "Rejected from joining";
+        return false;
+      }
+
       if (this.event.capacity == null) {
         this.attendanceButtonText = this.event.requiresAttendanceControl === 1 ?  "Request to Join" : "Join";
         return true;
@@ -241,8 +272,23 @@ export default {
 
     },
 
-    requestAttendance: function() {
+    leaveEvent: function() {
+      api.deleteAttendee(this.event.id)
+        .then(() => {
+          this.status = "";
+          this.$message.success("You have successfully left the event.")
+          this.getEvent();
+          this.getAttendees();
+        })
+        .catch((error) =>{
+          console.log(error);
+          if (error.response.status) {
+            this.$message.error(error.response.statusText);
+          }
+        });
+    },
 
+    requestAttendance: function() {
 
       api.addAttendance(this.event.id)
         .then(() => {
@@ -254,8 +300,8 @@ export default {
             this.$message.success("Successfully joined event.");
             this.status = "accepted";
             this.getEvent();
+            this.getAttendees();
           }
-
 
         })
         .catch((error) => {
@@ -268,7 +314,10 @@ export default {
     },
 
     isOrganizer: function() {
-      return this.event.organizerId === sessionStorage.getItem('userId');
+      console.log("SESS " + sessionStorage.getItem("userId"));
+      console.log("EVENT ID " + this.event.organizerId);
+      console.log(this.event.organizerId === sessionStorage.getItem("userId"));
+      return this.event.organizerId === sessionStorage.getItem("userId");
     },
 
     deleteEvent: function() {
@@ -346,6 +395,7 @@ export default {
   /* Image Container */
   #image-container {
     margin-bottom: 1em;
+
   }
 
   #event-image {

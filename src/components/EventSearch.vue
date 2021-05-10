@@ -141,7 +141,9 @@ export default {
 
   data: function() {
     return {
-      eventsList: [],
+      allEvents: [], // contains every every from the request.
+      eventsList: [], // contains only the currently viewable/paginated events.
+
       eventCategories: [],
 
       searchQuery: "",
@@ -169,20 +171,6 @@ export default {
   },
 
   methods: {
-    getAllEvents: function() {
-      api.getAllEvents()
-        .then((res) => {
-          this.eventsList = res.data;
-          this.totalEvents = this.eventsList.length;
-        })
-        .catch((error) => {
-          if (error.response.status === 400) {
-            this.$message.error(error.response.statusText);
-          }
-          console.log(error);
-        });
-    },
-
     searchEvents: function() {
       let params = {};
 
@@ -202,15 +190,16 @@ export default {
         params.sortBy = this.sortBy.toString() + this.sortByDirection.toString();
       }
 
-      params.count = this.count;
-      params.startIndex = this.startIndex;
-
       console.log(params);
       api.searchEvents(params)
         .then((res) => {
-          this.eventsList = res.data;
+          this.allEvents = res.data;
+          this.startIndex = 0;
+          this.eventsList = this.allEvents.slice(this.startIndex, this.startIndex + this.count);
+          this.totalEvents = this.allEvents.length;
+          this.eventsList = this.eventsList.filter(event => new Date(event.date) >= Date.now());
           // this.getOnlyCategoryFilterEvents();
-          console.log(this.eventsList);
+
         })
         .catch((error) => {
           if (error.response.status === 400) {
@@ -260,12 +249,13 @@ export default {
 
     handlePageChange: function(page) {
       this.startIndex = (page * this.count) - 10;
-      this.searchEvents();
+      this.eventsList = this.allEvents.slice(this.startIndex, this.startIndex + this.count);
     },
 
     handleTabChange: function(tab) {
       if (tab.index === "0") {
-        this.getAllEvents();
+        this.organizerId = -1;
+        this.searchEvents();
       }
       else if (tab.index === "1") {
         this.getUserEvents();
@@ -286,9 +276,7 @@ export default {
     }
 
     this.getAllCategories();
-    this.getAllEvents();
     this.searchEvents();
-
   }
 
 }

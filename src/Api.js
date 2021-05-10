@@ -46,6 +46,10 @@ export default {
 
     addAttendance: (id) => instance.post(`/events/${id}/attendees`, {}, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
+    deleteAttendee: (id) => instance.delete(`/events/${id}/attendees`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
+    changeAttendeeStatus: (eventId, userId, status) => instance.patch(`/events/${eventId}/attendees/${userId}`, {status}, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
     // === Event Images === //
 
     getEventImage: function(eventId) {
