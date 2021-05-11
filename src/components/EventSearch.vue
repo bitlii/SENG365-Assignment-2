@@ -67,7 +67,7 @@
               </el-divider>
 
               <div class="host-container">
-                <el-avatar></el-avatar>
+                <el-avatar :src="event.organizerImage"></el-avatar>
                 <div class="host-name">
                   {{ event.organizerFirstName }} {{ event.organizerLastName }}
                 </div>
@@ -115,7 +115,7 @@
               </el-divider>
 
               <div class="host-container">
-                <el-avatar></el-avatar>
+                <el-avatar :src="event.organizerImage"></el-avatar>
                 <div class="host-name">
                   {{ event.organizerFirstName }} {{ event.organizerLastName }}
                 </div>
@@ -193,9 +193,16 @@ export default {
         .then((res) => {
           this.allEvents = res.data;
           this.startIndex = 0;
-          this.eventsList = this.allEvents.slice(this.startIndex, this.startIndex + this.count);
           this.totalEvents = this.allEvents.length;
+
+          this.eventsList = this.allEvents.slice(this.startIndex, this.startIndex + this.count);
           this.eventsList = this.eventsList.filter(event => new Date(event.date) >= Date.now());
+          for (let i = 0; i < this.allEvents.length;  i++) {
+            api.getEvent(this.allEvents[i].eventId)
+              .then((res) => {
+                this.allEvents[i]["organizerImage"] = api.getUserImage(res.data.organizerId);
+              });
+          }
           // this.getOnlyCategoryFilterEvents();
           this.eventLoading = false;
 

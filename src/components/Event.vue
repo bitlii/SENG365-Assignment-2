@@ -148,7 +148,7 @@
               </el-divider>
 
               <div class="host-container">
-                <el-avatar></el-avatar>
+                <el-avatar :src="event.organizerImage"></el-avatar>
                 <div class="host-name">
                   {{ event.organizerFirstName }} {{ event.organizerLastName }}
                 </div>
@@ -207,8 +207,8 @@ export default {
   },
 
   methods: {
-    getEvent: function() {
-      api.getEvent(this.$route.params.id)
+    getEvent: function(eventId) {
+      api.getEvent(eventId)
         .then((res) => {
           this.event = res.data;
           if (this.event.attendeeCount == null) {
@@ -226,10 +226,16 @@ export default {
     getSimilarEvents: function() {
       let params = {};
       params.categoryIds = this.event.categories;
-      console.log(params);
       api.searchEvents(params)
         .then((res) => {
           this.similarEvents = res.data.filter(e => e.eventId !== this.event.id && new Date(e.date) >= Date.now());
+
+          for (let i = 0; i < this.similarEvents.length;  i++) {
+            api.getEvent(this.similarEvents[i].eventId)
+                .then((res) => {
+                  this.similarEvents[i]["organizerImage"] = api.getUserImage(res.data.organizerId);
+                });
+          }
 
         })
         .catch((error) => {
@@ -261,8 +267,8 @@ export default {
       return api.getUserImage(userId);
     },
 
-    getAttendees: function() {
-      api.getEventAttendees(this.$route.params.id)
+    getAttendees: function(eventId) {
+      api.getEventAttendees(eventId)
         .then((res) => {
           this.attendees = res.data;
           let loggedInId = parseInt(sessionStorage.getItem("userId"));
@@ -361,8 +367,8 @@ export default {
         .then(() => {
           this.status = "";
           this.$message.success("You have successfully left the event.")
-          this.getEvent();
-          this.getAttendees();
+          this.getEvent(this.event.id);
+          this.getAttendees(this.event.id);
         })
         .catch((error) =>{
           console.log(error);
@@ -383,8 +389,8 @@ export default {
           else {
             this.$message.success("Successfully joined event.");
             this.status = "accepted";
-            this.getEvent();
-            this.getAttendees();
+            this.getEvent(this.event.id);
+            this.getAttendees(this.event.id);
           }
 
         })
@@ -428,12 +434,22 @@ export default {
         });
     },
 
+    goToEvent: function(eventId) {
+      this.loadEventData(eventId);
+      this.$router.push(`/events/${eventId}`);
+      window.scrollTo(0, 0);
+    },
+
+    loadEventData: function(eventId) {
+      this.getEvent(eventId);
+      this.getAttendees(eventId);
+    }
+
   },
 
   mounted: function() {
-    this.getEvent();
     this.getAllCategories();
-    this.getAttendees();
+    this.loadEventData(this.$route.params.id);
   }
 
 }
