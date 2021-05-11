@@ -11,7 +11,7 @@
           <el-input v-model="loginForm.email" placeholder="Email" type="email"></el-input>
         </el-form-item>
         <el-form-item id="password">
-          <el-input v-model="loginForm.password" placeholder="Password" type="password" show-password></el-input>
+          <el-input v-model="loginForm.password" @keyup.enter="login()" placeholder="Password" type="password" show-password></el-input>
         </el-form-item>
 
         <el-footer id="login-button">

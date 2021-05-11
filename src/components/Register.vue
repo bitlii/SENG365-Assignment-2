@@ -32,7 +32,7 @@
           <el-input v-model="registerForm.email" placeholder="Email" type="email"></el-input>
         </el-form-item>
         <el-form-item id="password" prop="password">
-          <el-input v-model="registerForm.password" placeholder="Password" type="password" show-password></el-input>
+          <el-input v-model="registerForm.password" @keyup.enter="onRegister('registerForm')" placeholder="Password" type="password" show-password></el-input>
         </el-form-item>
 
         <el-form-item id="create-button">
