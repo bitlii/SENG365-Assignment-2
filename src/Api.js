@@ -16,6 +16,8 @@ export default {
 
     getUser: (id) => instance.get(`/users/${id}`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
+    updateUser: (id, body) => instance.patch(`/users/${id}`, body, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
     // === User Image === //
     setUserImage: (id, image, headers) => instance.put(`/users/${id}/image`, {image}, {headers: headers}),
 
