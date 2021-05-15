@@ -34,9 +34,12 @@
       <!-- Optional Fields -->
       <div id="fee-date-row">
         <el-form-item>
-          <el-input v-model="eventForm.fee" type="number" placeholder="Fee">
-            <template #prepend> $ </template>
-          </el-input>
+          <el-tooltip content="Leave blank for to set event as free." placement="top">
+            <el-input v-model="eventForm.fee" type="number" placeholder="Fee (Empty field will create an empty event)">
+              <template #prepend> $ </template>
+            </el-input>
+          </el-tooltip>
+
         </el-form-item>
         <el-form-item>
           <el-date-picker v-model="eventForm.date" style="width: 100%" type="datetime" placeholder="Select Date & Time" :disabled-date="disablePastDates"></el-date-picker>
@@ -189,13 +192,33 @@ export default {
           this.eventForm.capacity = this.eventForm.capacity == null ? null : parseInt(this.eventForm.capacity);
           this.eventForm.fee = this.eventForm.fee == null ? null : parseFloat(this.eventForm.fee);
           this.eventForm.date = this.dateFormatter(this.eventForm.date);
-          console.log(this.eventForm);
-          api.createEvent(
-              this.eventForm.title, this.eventForm.description,
-              this.eventForm.categoryIds, this.eventForm.date,
-              this.eventForm.isOnline, this.eventForm.url,
-              this.eventForm.venue, this.eventForm.capacity,
-              this.eventForm.requireAttendanceControl, this.eventForm.fee)
+
+          let newEvent = {
+            title: this.eventForm.title,
+            description: this.eventForm.description,
+            categoryIds: this.eventForm.categoryIds,
+            date: this.eventForm.date,
+            isOnline: this.eventForm.isOnline,
+            url: this.eventForm.url,
+            requiresAttendanceControl: this.eventForm.requireAttendanceControl,
+          }
+
+          if (!this.eventForm.isOnline) {
+            newEvent.venue = this.eventForm.venue;
+          }
+
+
+          if (this.eventForm.capacity != null) {
+             newEvent.capacity = this.eventForm.capacity;
+          }
+
+          if (this.eventForm.fee != null) {
+            newEvent.fee = this.eventForm.fee;
+          }
+
+
+          console.log(newEvent);
+          api.createEvent(newEvent)
             .then((res) => {
               if (this.eventForm.image != null) {
                 let headers = {

@@ -92,6 +92,8 @@
           </template>
         </el-dialog>
 
+        <el-button type="primary">Edit Event</el-button>
+
         <el-button type="primary" @click="attendanceDrawerVisible = true">Manage Attendance</el-button>
         <el-drawer v-model="attendanceDrawerVisible" title="Manage Attendee Requests" size="40%">
           <el-table :data="requestedAttendees" id="request-attendees-table">

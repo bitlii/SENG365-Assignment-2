@@ -35,10 +35,7 @@ export default {
 
     getEvent: (id) => instance.get(`/events/${id}`),
 
-    createEvent: (title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee) =>
-        instance.post("/events",
-            {title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee},
-            {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+    createEvent: (newEvent) => instance.post("/events", newEvent, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
     deleteEvent: (id) => instance.delete(`/events/${id}`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
