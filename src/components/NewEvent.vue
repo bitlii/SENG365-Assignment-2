@@ -41,7 +41,7 @@
           </el-tooltip>
 
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="date">
           <el-date-picker v-model="eventForm.date" style="width: 100%" type="datetime" placeholder="Select Date & Time" :disabled-date="disablePastDates"></el-date-picker>
         </el-form-item>
       </div>
@@ -76,7 +76,6 @@
 
 <script>
 import api from "../Api";
-import dayjs from 'dayjs';
 
 export default {
   name: "NewEvent",
@@ -153,6 +152,7 @@ export default {
           {validator: validateVenue, trigger: "blur"}
         ],
         date: [
+          {required: true, message: "Date for this event is missing.", trigger: "blur"},
           {type: "date", message: "Please input a valid date.", trigger: "change"}
         ],
       },
@@ -175,11 +175,6 @@ export default {
       return date < Date.now();
     },
 
-    dateFormatter: function(date) {
-      return dayjs(date).format("YY-MM-DD HH-mm-ss.sss");
-
-    },
-
     toggleImage: function(file) {
       console.log(file);
       this.eventForm.image = URL.createObjectURL(file.raw);
@@ -191,7 +186,8 @@ export default {
         if (isValid) {
           this.eventForm.capacity = this.eventForm.capacity == null ? null : parseInt(this.eventForm.capacity);
           this.eventForm.fee = this.eventForm.fee == null ? null : parseFloat(this.eventForm.fee);
-          this.eventForm.date = this.dateFormatter(this.eventForm.date);
+          this.eventForm.date = this.eventForm.date.replace("T", " ");
+          this.eventForm.date = this.eventForm.date.replace("Z", "");
 
           let newEvent = {
             title: this.eventForm.title,

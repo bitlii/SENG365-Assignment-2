@@ -27,8 +27,6 @@ export default {
 
     // === Events === //
 
-    getAllEvents: () => instance.get("/events", {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
-
     searchEvents: (queries) => instance.get("/events", {params: queries}),
 
     getEventCategories: () => instance.get("/events/categories"),
@@ -36,6 +34,8 @@ export default {
     getEvent: (id) => instance.get(`/events/${id}`),
 
     createEvent: (newEvent) => instance.post("/events", newEvent, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
+
+    editEvent: (id, editedEvent) => instance.patch(`/events/${id}`, editedEvent, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
     deleteEvent: (id) => instance.delete(`/events/${id}`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 

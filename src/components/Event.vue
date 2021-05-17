@@ -82,7 +82,7 @@
         <el-button type="danger" v-if="checkCanLeave()" @click="leaveEvent()">
           Leave</el-button>
       </div>
-      <div v-else style="display:flex; justify-content: space-around">
+      <div v-else-if="isFutureDate()" style="display:flex; justify-content: space-around">
         <el-button type="danger" @click="deleteDialogVisible = true">Delete</el-button>
         <el-dialog  width="400px" title="Confirm Deletion" v-model="deleteDialogVisible">
           Are you sure you want to delete this event?
@@ -92,7 +92,10 @@
           </template>
         </el-dialog>
 
-        <el-button type="primary">Edit Event</el-button>
+        <el-button type="primary" @click="editModal = true">Edit Event</el-button>
+        <el-dialog v-model="editModal" title="Edit Event">
+          <EventEdit :eventData="event" :eventCategories="allCategories" @editFinish="editFinish"></EventEdit>
+        </el-dialog>
 
         <el-button type="primary" @click="attendanceDrawerVisible = true">Manage Attendance</el-button>
         <el-drawer v-model="attendanceDrawerVisible" title="Manage Attendee Requests" size="40%">
@@ -188,10 +191,11 @@
 <script>
 import api from "../Api";
 import 'element-plus/lib/theme-chalk/display.css';
+import EventEdit from "./EventEdit";
 
 export default {
   name: "Event",
-
+  components: {EventEdit},
   data: function() {
     return {
       event: null,
@@ -204,6 +208,7 @@ export default {
       attendanceButtonText: "Request to Join",
       deleteDialogVisible: false,
       attendanceDrawerVisible: false,
+      editModal: false,
 
     }
   },
@@ -213,6 +218,8 @@ export default {
       api.getEvent(eventId)
         .then((res) => {
           this.event = res.data;
+          this.event.date = this.event.date.replace("T", " ");
+          this.event.date = this.event.date.replace("Z", "");
           if (this.event.attendeeCount == null) {
             this.event.attendeeCount = 0;
           }
@@ -233,6 +240,8 @@ export default {
           this.similarEvents = res.data.filter(e => e.eventId !== this.event.id && new Date(e.date) >= Date.now());
 
           for (let i = 0; i < this.similarEvents.length;  i++) {
+            this.similarEvents[i].date = this.similarEvents[i].date.replace("T", " ");
+            this.similarEvents[i].date = this.similarEvents[i].date.replace("Z", "");
             api.getEvent(this.similarEvents[i].eventId)
                 .then((res) => {
                   this.similarEvents[i]["organizerImage"] = api.getUserImage(res.data.organizerId);
@@ -297,6 +306,10 @@ export default {
 
     getAttendeeImage: function(userId) {
       return api.getUserImage(userId);
+    },
+
+    isFutureDate: function() {
+      return new Date(this.event.date) >= Date.now();
     },
 
     checkCanLeave: function() {
@@ -445,7 +458,12 @@ export default {
     loadEventData: function(eventId) {
       this.getEvent(eventId);
       this.getAttendees(eventId);
-    }
+    },
+
+    editFinish: function() {
+      this.getEvent(this.event.id);
+      this.editModal = false;
+    },
 
   },
 

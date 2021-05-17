@@ -198,6 +198,9 @@ export default {
           this.eventsList = this.allEvents.slice(this.startIndex, this.startIndex + this.count);
           this.eventsList = this.eventsList.filter(event => new Date(event.date) >= Date.now());
           for (let i = 0; i < this.allEvents.length;  i++) {
+            this.allEvents[i].date = this.allEvents[i].date.replace("T", " ");
+            this.allEvents[i].date = this.allEvents[i].date.replace("Z", "");
+
             api.getEvent(this.allEvents[i].eventId)
               .then((res) => {
                 this.allEvents[i]["organizerImage"] = api.getUserImage(res.data.organizerId);
