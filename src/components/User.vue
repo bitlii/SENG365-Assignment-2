@@ -2,7 +2,7 @@
   <el-card class="container">
 
     <div id="image-container">
-      <el-avatar :src="getUserImage()" :size="200" shape="square">
+      <el-avatar :src="userImage" :size="200" shape="square">
         <template #error>
           <el-avatar icon="el-icon-user-solid" :size="200" shape="square"></el-avatar>
         </template>
@@ -47,15 +47,21 @@
       <el-form-item prop="currentPassword" style="grid-column: 2; grid-row: 3">
         <el-input type="password" v-model="editForm.currentPassword" :disabled="editForm.password === ''" class="edit-input" placeholder="Current Password"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item class="image-upload-container">
         <el-upload
+            class="image-upload"
             :auto-upload="false"
             action="#"
+            list-type="picture-card"
             :on-change="userImageChanged"
-            ref="imageUpload">
-          <img v-if="editForm.image != null" width="100" height="100" :src="editForm.image"/>
-          <el-button size="small" type="primary">select file</el-button>
+            :on-remove="removeImage"
+            :show-file-list="false">
+          <el-image v-if="editForm.imageView != null" :src="editForm.imageView"/>
+          <i v-else class="el-icon-plus image-uploader-icon"></i>
         </el-upload>
+        <div id="remove-button">
+          <el-button type="text" @click="removeImage()">Remove</el-button>
+        </div>
       </el-form-item>
       <!-- Edit Image -->
       <el-button type="success" @click="updateUser()" style="grid-row: 5;">Finish</el-button>
@@ -82,7 +88,6 @@ export default {
         else {
           callback();
         }
-
       }
       else {
         callback();
@@ -91,6 +96,7 @@ export default {
 
     return {
       user: {},
+      userImage: "",
       editModal: false,
 
       editForm: {
@@ -99,8 +105,10 @@ export default {
         lastName: "",
         password: "",
         currentPassword: "",
+        imageView: null,
         image: null,
         imageType: "",
+        deleteImage: false,
       },
       editRules: {
         firstName: [
@@ -128,6 +136,7 @@ export default {
       api.getUser(this.$route.params.id)
         .then((res) => {
           this.user = res.data;
+          this.userImage = this.getUserImage();
           console.log(res.data);
         })
         .catch((error) => {
@@ -140,10 +149,37 @@ export default {
       return api.getUserImage(this.$route.params.id);
     },
 
+    removeImage: function() {
+      if (this.userImage != null) {
+        this.editForm.deleteImage = true;
+      }
+
+      this.editForm.imageView = null;
+      this.editForm.image = null;
+      this.editForm.imageType = ""
+
+    },
+
+    checkValidImage: function(file) {
+      console.log(file);
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+      let isValid = true;
+
+      if (!validImageTypes.includes(file.raw.type)) {
+        isValid = false;
+        this.$message.error("Profile image must be a JPG, PNG, or GIF.")
+      }
+
+      return isValid;
+    },
+
     userImageChanged: function(file) {
-      this.editForm.image = URL.createObjectURL(file.raw);
-      this.editForm.imageType = file.raw.type;
-      console.log(this.editForm.image);
+      if (this.checkValidImage(file)) {
+        this.editForm.deleteImage = false;
+        this.editForm.imageView = URL.createObjectURL(file.raw);
+        this.editForm.image = file.raw;
+        this.editForm.imageType = file.raw.type;
+      }
     },
 
     openEditModal: function() {
@@ -151,6 +187,7 @@ export default {
       this.editForm.email = this.user.email;
       this.editForm.firstName = this.user.firstName;
       this.editForm.lastName = this.user.lastName;
+      this.editForm.imageView = this.userImage;
     },
 
     resetEditForm: function() {
@@ -159,6 +196,9 @@ export default {
       this.editForm.lastName = this.user.lastName;
       this.editForm.password = "";
       this.editForm.currentPassword = "";
+      this.editForm.imageView = null;
+      this.editForm.image = null;
+      this.editForm.imageType = ""
     },
 
     updateUser: function() {
@@ -174,29 +214,36 @@ export default {
               updatedDetails.currentPassword = this.editForm.currentPassword;
             }
 
-            // let file = this.$refs.imageUpload.uploadFiles[0].raw;
-            // console.log(file);
-            let headers = {
-              "X-Authorization": sessionStorage.getItem("token"),
-              "Content-Type": this.editForm.imageType,
+            if (this.editForm.deleteImage === true) {
+              this.userImage = "";
+              api.deleteUserImage(this.$route.params.id)
+                  .then(() => console.log("Successfully deleted image."))
+                  .catch((error) => console.log(error));
             }
 
-            api.setUserImage(this.$route.params.id, this.editForm.image, headers)
-              .then(() => console.log("Success!"))
-              .catch((error) => console.log(error));
+            if (this.editForm.image != null) {
+              let headers = {
+                "X-Authorization": sessionStorage.getItem("token"),
+                "Content-Type": this.editForm.imageType,
+              }
+              this.userImage = "";
+              api.setUserImage(this.$route.params.id, this.editForm.image, headers)
+                  .then(() => console.log("Successfully uploaded image."))
+                  .catch((error) => console.log(error));
+            }
 
-            // api.updateUser(this.$route.params.id, updatedDetails)
-            //   .then(() => {
-            //     this.editModal = false;
-            //     this.getUser();
-            //     this.$message.success("Successfully updated user details.");
-            //   })
-            //   .catch((error) => {
-            //     console.log(error);
-            //     if (error.response.status) {
-            //       this.$message.error(error.response.statusText);
-            //     }
-            //   });
+            api.updateUser(this.$route.params.id, updatedDetails)
+              .then(() => {
+                this.editModal = false;
+                this.getUser();
+                this.$message.success("Successfully updated user details.");
+              })
+              .catch((error) => {
+                console.log(error);
+                if (error.response.status) {
+                  this.$message.error(error.response.statusText);
+                }
+              });
           }
       });
     },
@@ -214,9 +261,8 @@ export default {
       let userId = sessionStorage.getItem("userId");
       this.$router.push(`/users/${userId}`);
     }
-
     this.getUser();
-  }
+  },
 
 }
 </script>
@@ -246,5 +292,13 @@ export default {
   .edit-input {
   }
 
+  /* === IMAGE UPLOAD === */
+  .image-upload-container {
+    margin: 0 auto 1.5em auto;
+  }
+
+  #remove-button >>> span {
+    margin: 0 3em;
+  }
 
 </style>

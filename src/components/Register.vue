@@ -7,16 +7,17 @@
 
         <el-form-item id="image-uploader">
             <div>Add Profile Image (Optional)</div>
-            <el-upload
-                ref="uploadImage"
-                list-type="picture-card"
-                :on-change="toggleUpload"
-                :on-remove="toggleUpload"
-                action="#"
-                :auto-upload="false">
-              <div v-if="registerForm.profileImage == null" class="el-icon-plus avatar-uploader-icon"></div>
-
-            </el-upload>
+          <el-upload
+              class="image-upload"
+              :auto-upload="false"
+              action="#"
+              list-type="picture-card"
+              :on-change="toggleUpload"
+              :show-file-list="false">
+            <el-image v-if="registerForm.profileImage != null" :src="registerForm.profileImageView"/>
+            <div v-else class="el-icon-plus avatar-uploader-icon"></div>
+          </el-upload>
+          <el-button type="text" @click="removeImage()">Remove</el-button>
         </el-form-item>
 
         <el-form-item id="first-name" prop="firstName">
@@ -47,6 +48,7 @@ import api from "../Api";
 
 export default {
   name: "Register",
+  emits: ["logged-in"],
 
   data: function() {
     return {
@@ -56,8 +58,8 @@ export default {
         email: "",
         password: "",
         profileImage: null,
+        profileImageView: null,
       },
-      showUpload: true,
 
       formRules: {
         firstName: [
@@ -80,19 +82,9 @@ export default {
 
   methods: {
     toggleUpload(file) {
-      this.showUpload = !this.showUpload;
-
-      if (this.showUpload) {
-        if(this.checkValidProfileImage(file)) {
-          this.registerForm.profileImage = file;
-        }
-        else {
-          this.$refs['uploadImage'].clearFiles();
-          this.showUpload = !this.showUpload;
-        }
-      }
-      else {
-        this.registerForm.profileImage = null;
+      if (this.checkValidProfileImage(file)) {
+        this.registerForm.profileImageView = URL.createObjectURL(file.raw);
+        this.registerForm.profileImage = file.raw;
       }
     },
 
@@ -109,6 +101,11 @@ export default {
       return isValid;
     },
 
+    removeImage: function() {
+      this.registerForm.profileImageView = null;
+      this.registerForm.profileImage = null;
+    },
+
     onRegister: function(form) {
       this.$refs[form].validate((isValid) => {
         if (isValid) {
@@ -121,17 +118,14 @@ export default {
                     console.log("logged in.");
                     sessionStorage.setItem('userId', res.data.userId);
                     sessionStorage.setItem('token', res.data.token);
-                    api.setAuthHeader(res.data.token);
-
+                    this.$emit("logged-in");
                     if (this.registerForm.profileImage != null) {
                       let headers = {
                         'X-Authorization': sessionStorage.getItem("token"),
-                        'Content-Type': this.registerForm.profileImage.raw.type,
+                        'Content-Type': this.registerForm.profileImage.type,
                       };
-                      console.log("setting image.");
                       api.setUserImage(res.data.userId, this.registerForm.profileImage, headers)
                         .then(() => {
-                          console.log("image set.");
                           this.$router.push("/events");
                         })
                         .catch((error) => {
@@ -230,10 +224,6 @@ export default {
   }
 
   /* Image Upload Styling */
-  .hideUpload >>> div {
-    margin: auto;
-    display: none;
-  }
 
   .avatar-uploader-icon {
     font-size: 28px;
@@ -242,11 +232,6 @@ export default {
     text-align: center;
   }
 
-  .avatar {
-    width: 100px;
-    height: 100px;
-    display: block;
-  }
 
   @media screen and (max-width: 560px) {
   }

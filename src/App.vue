@@ -78,17 +78,6 @@ export default {
       this.loggedInId = this.getLoggedInUserId();
     }
 
-    // setAvatarImage: function() {
-    //   if (sessionStorage.getItem("userId") != null) {
-    //     api.getUserImage(sessionStorage.getItem("userId"))
-    //         .then((res) => {
-    //           this.avatarImage = res.data;
-    //           console.log(this.avatarImage);
-    //         });
-    //     return true;
-    //   }
-    //   return false;
-    // },
   },
 
   mounted: function() {

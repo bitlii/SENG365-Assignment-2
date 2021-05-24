@@ -47,7 +47,7 @@
       </div>
 
       <div id="capacity-control-row">
-        <el-form-item>
+        <el-form-item prop="capacity">
           <el-input type="number" v-model="eventForm.capacity" placeholder="Capacity (Empty field will set no limit)"></el-input>
         </el-form-item>
         <el-form-item>
@@ -56,15 +56,18 @@
         </el-form-item>
       </div>
 
-      <el-upload
-          class="image-uploader"
-          action="#"
-          :show-file-list="false"
-          :auto-upload="false"
-          :on-change="toggleImage">
-        <img v-if="eventForm.image" :src="eventForm.image" class="image" />
-        <i v-else class="el-icon-plus image-uploader-icon"></i>
-      </el-upload>
+      <el-form-item id="image-uploader">
+        <div>Add Event Image (Optional)</div>
+        <el-upload
+            :auto-upload="false"
+            action="#"
+            list-type="picture-card"
+            :on-change="toggleImage"
+            :show-file-list="false">
+          <el-image v-if="eventForm.imageView" :src="eventForm.imageView" class="image" fit="contain"/>
+          <i v-else class="el-icon-plus image-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
 
 
       <el-button type="primary" @click="createEvent('eventForm')"> Create </el-button>
@@ -117,6 +120,15 @@ export default {
       }
     };
 
+    let validateCapacity = (rule, value, callback) => {
+      if (this.eventForm.capacity < 0) {
+        callback(new Error("Capacity cannot be below 0."));
+      }
+      else {
+        callback();
+      }
+    };
+
     return {
       eventForm: {
         title: "",
@@ -130,8 +142,8 @@ export default {
         requireAttendanceControl: false,
         fee: null,
 
+        imageView: null,
         image: null,
-        imageRaw: null,
       },
       eventCategories: [],
 
@@ -150,6 +162,9 @@ export default {
         ],
         venue: [
           {validator: validateVenue, trigger: "blur"}
+        ],
+        capacity: [
+          {validator: validateCapacity, trigger: "blur"}
         ],
         date: [
           {required: true, message: "Date for this event is missing.", trigger: "blur"},
@@ -176,9 +191,21 @@ export default {
     },
 
     toggleImage: function(file) {
-      console.log(file);
-      this.eventForm.image = URL.createObjectURL(file.raw);
-      this.eventForm.imageRaw = file.raw;
+      if (this.checkValidProfileImage(file)) {
+        this.eventForm.imageView = URL.createObjectURL(file.raw);
+        this.eventForm.image = file.raw;
+      }
+    },
+
+    checkValidProfileImage: function(file) {
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+      let isValid = true;
+
+      if (!validImageTypes.includes(file.raw.type)) {
+        isValid = false;
+        this.$message.error("Profile image must be a JPG, PNG, or GIF.")
+      }
+      return isValid;
     },
 
     createEvent: function(eventForm) {
@@ -204,14 +231,13 @@ export default {
           }
 
 
-          if (this.eventForm.capacity != null) {
+          if (this.eventForm.capacity != null || this.eventForm.capacity === 0) {
              newEvent.capacity = this.eventForm.capacity;
           }
 
           if (this.eventForm.fee != null) {
             newEvent.fee = this.eventForm.fee;
           }
-
 
           console.log(newEvent);
           api.createEvent(newEvent)
@@ -221,7 +247,8 @@ export default {
                   'X-Authorization': sessionStorage.getItem("token"),
                   'Content-Type': this.eventForm.imageRaw.type,
                 };
-                api.setEventImage(res.data.eventId, this.eventForm.imageRaw, headers)
+
+                api.setEventImage(res.data.eventId, this.eventForm.image, headers)
                   .then(() => {
                     this.$router.push(`/events/${res.data.eventId}`);
                   })
@@ -298,28 +325,25 @@ export default {
     grid-column-gap: 1em;
   }
 
-  .image-uploader .el-upload {
+  #image-uploader {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
   }
-  .image-uploader .el-upload:hover {
+  #image-uploader:hover {
     border-color: #409eff;
   }
-  .image-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
+
+  #image-uploader >>> .el-upload {
+    border: none;
+    width: 100%;
   }
+
   .image {
-    width: 178px;
-    height: 178px;
-    display: block;
+    width: 100%;
+    height: 100%;
   }
 
 </style>

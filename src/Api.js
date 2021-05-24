@@ -18,11 +18,13 @@ export default {
     updateUser: (id, body) => instance.patch(`/users/${id}`, body, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
     // === User Image === //
-    setUserImage: (id, image, headers) => instance.put(`/users/${id}/image`, {image}, {headers: headers}),
+    setUserImage: (id, image, headers) => instance.put(`/users/${id}/image`, image, {headers: headers}),
 
     getUserImage: function(id) {
         return `${SERVER_URL}/users/${id}/image`;
     },
+
+    deleteUserImage: (id) => instance.delete(`/users/${id}/image`, {headers: {"X-Authorization": sessionStorage.getItem("token")}}),
 
     // === Events === //
 
@@ -54,7 +56,7 @@ export default {
         return `${SERVER_URL}/events/${eventId}/image`;
     },
 
-    setEventImage: (id, image, imageHeaders) => instance.put(`/events/${id}/image`, {image}, {headers: imageHeaders}),
+    setEventImage: (id, image, imageHeaders) => instance.put(`/events/${id}/image`, image, {headers: imageHeaders}),
 
 
 
