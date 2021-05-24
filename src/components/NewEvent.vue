@@ -34,12 +34,11 @@
       <!-- Optional Fields -->
       <div id="fee-date-row">
         <el-form-item>
-          <el-tooltip content="Leave blank for to set event as free." placement="top">
+<!--          <el-tooltip content="Leave blank for to set event as free." placement="top">-->
             <el-input v-model="eventForm.fee" type="number" placeholder="Fee (Empty field will create an empty event)">
               <template #prepend> $ </template>
             </el-input>
-          </el-tooltip>
-
+<!--          </el-tooltip>-->
         </el-form-item>
         <el-form-item prop="date">
           <el-date-picker v-model="eventForm.date" style="width: 100%" type="datetime" placeholder="Select Date & Time" :disabled-date="disablePastDates"></el-date-picker>
@@ -68,6 +67,9 @@
           <i v-else class="el-icon-plus image-uploader-icon"></i>
         </el-upload>
       </el-form-item>
+      <div id="remove-button">
+        <el-button type="text" @click="removeImage()">Remove</el-button>
+      </div>
 
 
       <el-button type="primary" @click="createEvent('eventForm')"> Create </el-button>
@@ -208,14 +210,20 @@ export default {
       return isValid;
     },
 
+    removeImage: function() {
+      this.eventForm.imageView = null;
+      this.eventForm.image = null;
+
+    },
+
     createEvent: function(eventForm) {
       this.$refs[eventForm].validate((isValid) => {
         if (isValid) {
           this.eventForm.capacity = this.eventForm.capacity == null ? null : parseInt(this.eventForm.capacity);
           this.eventForm.fee = this.eventForm.fee == null ? null : parseFloat(this.eventForm.fee);
+          this.eventForm.date = this.eventForm.date.toISOString();
           this.eventForm.date = this.eventForm.date.replace("T", " ");
           this.eventForm.date = this.eventForm.date.replace("Z", "");
-
           let newEvent = {
             title: this.eventForm.title,
             description: this.eventForm.description,
@@ -225,7 +233,6 @@ export default {
             url: this.eventForm.url,
             requiresAttendanceControl: this.eventForm.requireAttendanceControl,
           }
-
           if (!this.eventForm.isOnline) {
             newEvent.venue = this.eventForm.venue;
           }
@@ -245,7 +252,7 @@ export default {
               if (this.eventForm.image != null) {
                 let headers = {
                   'X-Authorization': sessionStorage.getItem("token"),
-                  'Content-Type': this.eventForm.imageRaw.type,
+                  'Content-Type': this.eventForm.image.type,
                 };
 
                 api.setEventImage(res.data.eventId, this.eventForm.image, headers)
@@ -331,7 +338,9 @@ export default {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    margin-bottom: 0;
   }
+
   #image-uploader:hover {
     border-color: #409eff;
   }
@@ -344,6 +353,11 @@ export default {
   .image {
     width: 100%;
     height: 100%;
+  }
+
+  #remove-button {
+    padding-bottom: 1em;
+    margin-bottom: 1em;
   }
 
 </style>

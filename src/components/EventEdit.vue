@@ -31,12 +31,9 @@
     <!-- Optional Fields -->
     <div id="fee-date-row">
       <el-form-item>
-        <el-tooltip content="Leave blank for to set event as free." placement="top">
-          <el-input v-model="eventForm.fee" type="number" placeholder="Fee (Empty field will create an empty event)">
-            <template #prepend> $ </template>
-          </el-input>
-        </el-tooltip>
-
+        <el-input v-model="eventForm.fee" type="number" placeholder="Fee (Empty field will create an empty event)">
+          <template #prepend> $ </template>
+        </el-input>
       </el-form-item>
       <el-form-item prop="date">
         <el-date-picker v-model="eventForm.date" style="width: 100%" type="datetime" placeholder="Select Date & Time" :disabled-date="disablePastDates"></el-date-picker>
@@ -53,16 +50,23 @@
       </el-form-item>
     </div>
 
-    <el-upload
-        class="image-uploader"
-        action="#"
-        :show-file-list="false"
-        :auto-upload="false"
-        :on-change="toggleImage">
-      <img v-if="eventForm.image" :src="eventForm.image" class="image" />
-      <i v-else class="el-icon-plus image-uploader-icon"></i>
-    </el-upload>
+    <el-form-item id="image-uploader">
+      <div>Add Event Image (Optional)</div>
+      <el-upload
+          :auto-upload="false"
+          action="#"
+          list-type="picture-card"
+          :on-change="toggleImage"
+          :show-file-list="false">
+        <el-image v-if="eventForm.imageView" :src="eventForm.imageView" class="image" fit="contain">
+          <template #error>
+            <i class="el-icon-plus image-uploader-icon"></i>
+          </template>
+        </el-image>
+        <i v-else class="el-icon-plus image-uploader-icon"></i>
 
+      </el-upload>
+    </el-form-item>
 
     <el-button type="primary" @click="editEvent('eventForm')"> Edit </el-button>
 
@@ -77,6 +81,7 @@ export default {
   props: {
     eventData: Object,
     eventCategories: Array,
+    eventImage: String,
   },
   data: function() {
     let validateUrl = (rule, value, callback) => {
@@ -118,17 +123,17 @@ export default {
       eventForm: {
         title: this.eventData.title,
         description: this.eventData.description,
-        capacity: this.eventData.capacity.toString(),
+        capacity: this.eventData.capacity == null ? null : this.eventData.capacity.toString(),
         categoryIds: this.eventData.categories,
         date: this.eventData.date,
         url: this.eventData.url,
         venue: this.eventData.venue,
         isOnline: this.eventData.isOnline,
         requireAttendanceControl: this.eventData.requireAttendanceControl,
-        fee: this.eventData.fee.toString(),
+        fee: this.eventData.fee == null ? null : this.eventData.fee.toString(),
 
         image: null,
-        imageRaw: null,
+        imageView: this.eventImage,
       },
 
       eventFormRules: {
@@ -161,9 +166,28 @@ export default {
     },
 
     toggleImage: function(file) {
+      if (this.checkValidImage(file)) {
+        this.eventForm.imageView = URL.createObjectURL(file.raw);
+        this.eventForm.image = file.raw;
+      }
+    },
+
+    removeImage: function() {
+      this.eventForm.imageView = null;
+      this.eventForm.image = null;
+    },
+
+    checkValidImage: function(file) {
       console.log(file);
-      this.eventForm.image = URL.createObjectURL(file.raw);
-      this.eventForm.imageRaw = file.raw;
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+      let isValid = true;
+
+      if (!validImageTypes.includes(file.raw.type)) {
+        isValid = false;
+        this.$message.error("Profile image must be a JPG, PNG, or GIF.")
+      }
+
+      return isValid;
     },
 
     editEvent: function(eventForm) {
@@ -196,14 +220,15 @@ export default {
             editedEvent.fee = this.eventForm.fee;
           }
 
+
           api.editEvent(this.eventData.id, editedEvent)
               .then(() => {
                 if (this.eventForm.image != null) {
                   let headers = {
                     'X-Authorization': sessionStorage.getItem("token"),
-                    'Content-Type': this.eventForm.imageRaw.type,
+                    'Content-Type': this.eventForm.image.type,
                   };
-                  api.setEventImage(this.eventData.id, this.eventForm.imageRaw, headers)
+                  api.setEventImage(this.eventData.id, this.eventForm.image, headers)
                       .then(() => {
                         console.log("Successfully edited image.");
                       })
@@ -268,28 +293,26 @@ export default {
   grid-column-gap: 1em;
 }
 
-.image-uploader .el-upload {
+#image-uploader {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+
 }
-.image-uploader .el-upload:hover {
+#image-uploader:hover {
   border-color: #409eff;
 }
-.image-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
+
+#image-uploader >>> .el-upload {
+  border: none;
+  width: 100%;
 }
+
 .image {
-  width: 178px;
-  height: 178px;
-  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 </style>

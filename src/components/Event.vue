@@ -44,9 +44,9 @@
       <el-divider></el-divider>
 
       <div id="image-container">
-        <el-image id="event-image" :src="getEventImage(event.id)">
+        <el-image id="event-image" :src="eventImage">
           <template #error>
-            <el-avatar icon="el-icon-picture" :size="200" shape="square"></el-avatar>
+            <el-image class="event-image" :src="'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'" fit="cover"/>
           </template>
         </el-image>
       </div>
@@ -94,7 +94,7 @@
 
         <el-button type="primary" @click="editModal = true">Edit Event</el-button>
         <el-dialog v-model="editModal" title="Edit Event">
-          <EventEdit :eventData="event" :eventCategories="allCategories" @editFinish="editFinish"></EventEdit>
+          <EventEdit :eventData="event" :eventCategories="allCategories" :eventImage="eventImage" @editFinish="editFinish"></EventEdit>
         </el-dialog>
 
         <el-button type="primary" @click="attendanceDrawerVisible = true">Manage Attendance</el-button>
@@ -199,6 +199,7 @@ export default {
   data: function() {
     return {
       event: null,
+      eventImage: "",
       similarEvents: [],
       allCategories: [],
       attendees: [],
@@ -218,6 +219,7 @@ export default {
       api.getEvent(eventId)
         .then((res) => {
           this.event = res.data;
+          this.eventImage = this.getEventImage(this.event.id);
           this.event.date = this.event.date.replace("T", " ");
           this.event.date = this.event.date.replace("Z", "");
           if (this.event.attendeeCount == null) {
@@ -228,6 +230,7 @@ export default {
         })
         .catch((error) => {
           this.$message.error("Event page not found.");
+          this.$router.push("/events");
           console.log(error);
         });
     },
@@ -461,6 +464,7 @@ export default {
     },
 
     editFinish: function() {
+      this.eventImage = "";
       this.getEvent(this.event.id);
       this.editModal = false;
     },

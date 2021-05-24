@@ -67,7 +67,11 @@
               </el-divider>
 
               <div class="host-container">
-                <el-avatar :src="event.organizerImage"></el-avatar>
+                <el-avatar :src="event.organizerImage">
+                  <template #error>
+                    <el-avatar icon="el-icon-user-solid"></el-avatar>
+                  </template>
+                </el-avatar>
                 <div class="host-name">
                   {{ event.organizerFirstName }} {{ event.organizerLastName }}
                 </div>
@@ -217,17 +221,6 @@ export default {
           console.log(error);
         });
     },
-
-    // getOnlyCategoryFilterEvents: function() {
-    //   if (this.filterCategoryIds > 0) {
-    //     let array = this.eventsList;
-    //     console.log("FILTERED: " + this.filterCategoryIds);
-    //     for (let catId in this.filterCategoryIds) {
-    //       array.filter(e => e.categories.includes(catId));
-    //       console.log("TEST: " + array);
-    //     }
-    //   }
-    // },
 
     getEventImage:  function(eventId) {
       return api.getEventImage(eventId);
