@@ -47,6 +47,16 @@
       <el-form-item prop="currentPassword" style="grid-column: 2; grid-row: 3">
         <el-input type="password" v-model="editForm.currentPassword" :disabled="editForm.password === ''" class="edit-input" placeholder="Current Password"></el-input>
       </el-form-item>
+      <el-form-item>
+        <el-upload
+            :auto-upload="false"
+            action="#"
+            :on-change="userImageChanged"
+            ref="imageUpload">
+          <img v-if="editForm.image != null" width="100" height="100" :src="editForm.image"/>
+          <el-button size="small" type="primary">select file</el-button>
+        </el-upload>
+      </el-form-item>
       <!-- Edit Image -->
       <el-button type="success" @click="updateUser()">Finish</el-button>
       <el-button type="danger" @click="editModal = false">Cancel</el-button>
@@ -89,6 +99,8 @@ export default {
         lastName: "",
         password: "",
         currentPassword: "",
+        image: null,
+        imageType: "",
       },
       editRules: {
         firstName: [
@@ -128,6 +140,12 @@ export default {
       return api.getUserImage(this.$route.params.id);
     },
 
+    userImageChanged: function(file) {
+      this.editForm.image = URL.createObjectURL(file.raw);
+      this.editForm.imageType = file.raw.type;
+      console.log(this.editForm.image);
+    },
+
     openEditModal: function() {
       this.editModal = true;
       this.editForm.email = this.user.email;
@@ -156,18 +174,29 @@ export default {
               updatedDetails.currentPassword = this.editForm.currentPassword;
             }
 
-            api.updateUser(this.$route.params.id, updatedDetails)
-              .then(() => {
-                this.editModal = false;
-                this.getUser();
-                this.$message.success("Successfully updated user details.");
-              })
-              .catch((error) => {
-                console.log(error);
-                if (error.response.status) {
-                  this.$message.error(error.response.statusText);
-                }
-              });
+            // let file = this.$refs.imageUpload.uploadFiles[0].raw;
+            // console.log(file);
+            let headers = {
+              "X-Authorization": sessionStorage.getItem("token"),
+              "Content-Type": this.editForm.imageType,
+            }
+
+            api.setUserImage(this.$route.params.id, this.editForm.image, headers)
+              .then(() => console.log("Success!"))
+              .catch((error) => console.log(error));
+
+            // api.updateUser(this.$route.params.id, updatedDetails)
+            //   .then(() => {
+            //     this.editModal = false;
+            //     this.getUser();
+            //     this.$message.success("Successfully updated user details.");
+            //   })
+            //   .catch((error) => {
+            //     console.log(error);
+            //     if (error.response.status) {
+            //       this.$message.error(error.response.statusText);
+            //     }
+            //   });
           }
       });
     },
