@@ -48,8 +48,13 @@
         <el-input type="password" v-model="editForm.currentPassword" :disabled="editForm.password === ''" class="edit-input" placeholder="Current Password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-upload ref="avatarUpload" :auto-upload="false" action="#" style="grid-column: 1/3; grid-row: 4;">
-            <el-button>Upload Image</el-button>
+        <el-upload
+            :auto-upload="false"
+            action="#"
+            :on-change="userImageChanged"
+            ref="imageUpload">
+          <img v-if="editForm.image != null" width="100" height="100" :src="editForm.image"/>
+          <el-button size="small" type="primary">select file</el-button>
         </el-upload>
       </el-form-item>
       <!-- Edit Image -->
@@ -94,6 +99,8 @@ export default {
         lastName: "",
         password: "",
         currentPassword: "",
+        image: null,
+        imageType: "",
       },
       editRules: {
         firstName: [
@@ -133,6 +140,12 @@ export default {
       return api.getUserImage(this.$route.params.id);
     },
 
+    userImageChanged: function(file) {
+      this.editForm.image = URL.createObjectURL(file.raw);
+      this.editForm.imageType = file.raw.type;
+      console.log(this.editForm.image);
+    },
+
     openEditModal: function() {
       this.editModal = true;
       this.editForm.email = this.user.email;
@@ -149,7 +162,7 @@ export default {
     },
 
     updateUser: function() {
-      this.$refs.editForm.validate(async (isValid) => {
+      this.$refs.editForm.validate((isValid) => {
           if(isValid) {
             let updatedDetails = {
               firstName: this.editForm.firstName,
@@ -160,40 +173,17 @@ export default {
               updatedDetails.password = this.editForm.password
               updatedDetails.currentPassword = this.editForm.currentPassword;
             }
-            console.log(this.$refs.avatarUpload.uploadFiles[0]);
-            let headers;
-            let id = this.$route.params.id;
-            //
-            // let reader = new FileReader();
-            // reader.onloadend = function() {
-            //    let data = (reader.result).split(',')[1];
-            //   // let blob = atob(data);
-            //   api.setUserImage(id, data, headers)
-            //       .then(() => {
-            //         console.log("SUCCESS.");
-            //       })
-            //       .catch((error) => {
-            //         console.log("ERERERER");
-            //         console.log(error);
-            //      })
-            // }
-            let image = this.$refs.avatarUpload.uploadFiles[0].raw;
-            headers = {
-              'X-Authorization': sessionStorage.getItem("token"),
-              'Content-Type': image.type,
-            };
-            // reader.readAsDataURL(image);
-            // reader.readAsDataURL(image);
 
-              api.setUserImage(id, image, headers)
-                  .then(() => {
-                    console.log("SUCCESS.");
-                  })
-                  .catch((error) => {
-                    console.log("ERERERER");
-                    console.log(error);
-                 })
+            // let file = this.$refs.imageUpload.uploadFiles[0].raw;
+            // console.log(file);
+            let headers = {
+              "X-Authorization": sessionStorage.getItem("token"),
+              "Content-Type": this.editForm.imageType,
+            }
 
+            api.setUserImage(this.$route.params.id, this.editForm.image, headers)
+              .then(() => console.log("Success!"))
+              .catch((error) => console.log(error));
 
             // api.updateUser(this.$route.params.id, updatedDetails)
             //   .then(() => {
