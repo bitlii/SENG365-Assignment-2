@@ -8,7 +8,6 @@
         <el-form-item id="image-uploader">
             <div>Add Profile Image (Optional)</div>
             <el-upload
-                :class="{hideUpload: !showUpload}"
                 ref="uploadImage"
                 list-type="picture-card"
                 :on-change="toggleUpload"
@@ -36,7 +35,7 @@
         </el-form-item>
 
         <el-form-item id="create-button">
-          <el-button type="primary" @click="onRegister('registerForm')" round>Create</el-button>
+          <el-button type="primary" @click="onRegister('registerForm')" >Create</el-button>
         </el-form-item>
 
       </el-form>
@@ -83,7 +82,7 @@ export default {
     toggleUpload(file) {
       this.showUpload = !this.showUpload;
 
-      if (!this.showUpload) {
+      if (this.showUpload) {
         if(this.checkValidProfileImage(file)) {
           this.registerForm.profileImage = file;
         }

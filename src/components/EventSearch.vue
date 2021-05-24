@@ -279,11 +279,6 @@ export default {
   },
 
   mounted: function() {
-    if (sessionStorage.getItem("token") == null) {
-      this.$message.error("You must log in first.");
-      this.$router.push("/");
-    }
-
     this.getAllCategories();
     this.searchEvents();
   }

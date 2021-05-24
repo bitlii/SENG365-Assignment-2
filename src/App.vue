@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header v-if="$route.path === '/' || $route.path === '/register'">
+    <el-header v-show="!isLoggedIn">
       <el-menu
           class="nav-menu"
           mode="horizontal"
@@ -9,11 +9,12 @@
           text-color="#FFFFFF"
           active-text-color="#FFFFFF"
           background-color="#303443">
-        <el-menu-item index="1" :route="'/'">Login</el-menu-item>
-        <el-menu-item index="2" :route="'/register'">Register</el-menu-item>
+        <el-menu-item index="0-1" :route="'/'">Login</el-menu-item>
+        <el-menu-item index="0-2" :route="'/register'">Register</el-menu-item>
+        <el-menu-item index="0-3" :route="'/events'">Events</el-menu-item>
       </el-menu>
     </el-header>
-    <el-header v-else>
+    <el-header v-show="isLoggedIn">
       <el-menu class="nav-menu"
                mode="horizontal"
                :default-active="activeNavIndex"
@@ -24,12 +25,12 @@
         <el-menu-item @click="logout()">Logout</el-menu-item>
         <el-menu-item index="1" :route="'/events'">Events</el-menu-item>
         <el-menu-item index="2" :route="'/events/create'"> Create New Event </el-menu-item>
-        <el-menu-item index="3" :route="`/users/${getLoggedInUserId()}`">Profile</el-menu-item>
+        <el-menu-item index="3" :route="`/users/${loggedInId}`">Profile</el-menu-item>
       </el-menu>
     </el-header>
 
     <el-main>
-      <router-view></router-view>
+      <router-view v-on:logged-in="onLogin()"></router-view>
     </el-main>
 
   </el-container>
@@ -44,6 +45,7 @@ export default {
   data: function() {
     return {
       isLoggedIn: false,
+      loggedInId: -1,
       activeNavIndex: "1",
     }
   },
@@ -54,7 +56,7 @@ export default {
         .then(() => {
           sessionStorage.removeItem("userId")
           sessionStorage.removeItem("token")
-
+          this.isLoggedIn = false;
           this.activeNavIndex = "1";
           this.$router.push("/");
         })
@@ -71,6 +73,11 @@ export default {
       return sessionStorage.getItem("userId");
     },
 
+    onLogin: function() {
+      this.isLoggedIn = true;
+      this.loggedInId = this.getLoggedInUserId();
+    }
+
     // setAvatarImage: function() {
     //   if (sessionStorage.getItem("userId") != null) {
     //     api.getUserImage(sessionStorage.getItem("userId"))
@@ -82,6 +89,12 @@ export default {
     //   }
     //   return false;
     // },
+  },
+
+  mounted: function() {
+    if (sessionStorage.getItem("token") != null) {
+      this.onLogin();
+    }
   },
 
 }

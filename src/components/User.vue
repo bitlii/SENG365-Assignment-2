@@ -47,10 +47,15 @@
       <el-form-item prop="currentPassword" style="grid-column: 2; grid-row: 3">
         <el-input type="password" v-model="editForm.currentPassword" :disabled="editForm.password === ''" class="edit-input" placeholder="Current Password"></el-input>
       </el-form-item>
+      <el-form-item>
+        <el-upload ref="avatarUpload" :auto-upload="false" action="#" style="grid-column: 1/3; grid-row: 4;">
+            <el-button>Upload Image</el-button>
+        </el-upload>
+      </el-form-item>
       <!-- Edit Image -->
-      <el-button type="success" @click="updateUser()">Finish</el-button>
-      <el-button type="danger" @click="editModal = false">Cancel</el-button>
-      <el-button type="text" @click="resetEditForm()" style="grid-column: 1/3;">Reset</el-button>
+      <el-button type="success" @click="updateUser()" style="grid-row: 5;">Finish</el-button>
+      <el-button type="danger" @click="editModal = false" style="grid-row: 5;">Cancel</el-button>
+      <el-button type="text" @click="resetEditForm()" style="grid-column: 1/3; grid-row: 7">Reset</el-button>
     </el-form>
   </el-dialog>
 
@@ -144,7 +149,7 @@ export default {
     },
 
     updateUser: function() {
-      this.$refs.editForm.validate((isValid) => {
+      this.$refs.editForm.validate(async (isValid) => {
           if(isValid) {
             let updatedDetails = {
               firstName: this.editForm.firstName,
@@ -155,19 +160,53 @@ export default {
               updatedDetails.password = this.editForm.password
               updatedDetails.currentPassword = this.editForm.currentPassword;
             }
+            console.log(this.$refs.avatarUpload.uploadFiles[0]);
+            let headers;
+            let id = this.$route.params.id;
+            //
+            // let reader = new FileReader();
+            // reader.onloadend = function() {
+            //    let data = (reader.result).split(',')[1];
+            //   // let blob = atob(data);
+            //   api.setUserImage(id, data, headers)
+            //       .then(() => {
+            //         console.log("SUCCESS.");
+            //       })
+            //       .catch((error) => {
+            //         console.log("ERERERER");
+            //         console.log(error);
+            //      })
+            // }
+            let image = this.$refs.avatarUpload.uploadFiles[0].raw;
+            headers = {
+              'X-Authorization': sessionStorage.getItem("token"),
+              'Content-Type': image.type,
+            };
+            // reader.readAsDataURL(image);
+            // reader.readAsDataURL(image);
 
-            api.updateUser(this.$route.params.id, updatedDetails)
-              .then(() => {
-                this.editModal = false;
-                this.getUser();
-                this.$message.success("Successfully updated user details.");
-              })
-              .catch((error) => {
-                console.log(error);
-                if (error.response.status) {
-                  this.$message.error(error.response.statusText);
-                }
-              });
+              api.setUserImage(id, image, headers)
+                  .then(() => {
+                    console.log("SUCCESS.");
+                  })
+                  .catch((error) => {
+                    console.log("ERERERER");
+                    console.log(error);
+                 })
+
+
+            // api.updateUser(this.$route.params.id, updatedDetails)
+            //   .then(() => {
+            //     this.editModal = false;
+            //     this.getUser();
+            //     this.$message.success("Successfully updated user details.");
+            //   })
+            //   .catch((error) => {
+            //     console.log(error);
+            //     if (error.response.status) {
+            //       this.$message.error(error.response.statusText);
+            //     }
+            //   });
           }
       });
     },
@@ -180,7 +219,7 @@ export default {
       this.$router.push("/");
     }
 
-    if (sessionStorage.getItem("userId") !== this.$route.params.id) {
+    else if (sessionStorage.getItem("userId") !== this.$route.params.id) {
       this.$message.error("You do not have permission to access this user's page.");
       let userId = sessionStorage.getItem("userId");
       this.$router.push(`/users/${userId}`);

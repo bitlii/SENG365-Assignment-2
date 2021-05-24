@@ -30,6 +30,8 @@ import api from "../Api";
 export default {
   name: "Login",
 
+  emits: ["logged-in"],
+
   data: function() {
     return {
       loginForm: {
@@ -45,6 +47,7 @@ export default {
           .then((res) => {
             sessionStorage.setItem("userId", res.data.userId);
             sessionStorage.setItem("token", res.data.token);
+            this.$emit("logged-in");
 
             this.$router.push("/events");
 
