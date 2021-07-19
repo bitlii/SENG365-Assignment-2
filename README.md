@@ -1,4 +1,6 @@
-# events-app
+# SENG365 2021 Assignment 2 - Frontend [A+]
+The frontend assignment, developed in Vue 3 with Element UI framework. 
+Requires the backend for it to properly work.
 
 ## Project setup
 ```
