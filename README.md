@@ -1,6 +1,13 @@
 # SENG365 2021 Assignment 2 - Frontend [A+]
-The frontend assignment, developed in Vue 3 with Element UI framework. 
-Requires the backend for it to properly work.
+The frontend assignment, requires the backend and access to the database for it to properly work.
+
+## Tech Stack Used
+* Vue 3
+* Element UI
+* Axios
+* Vue Router
+
+__________________________
 
 ## Project setup
 ```
